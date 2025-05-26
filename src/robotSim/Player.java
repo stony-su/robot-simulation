@@ -1,4 +1,5 @@
 package robotSim;
+import java.awt.Color;
 
 public abstract class Player {
 	int energyLevel;
@@ -9,5 +10,7 @@ public abstract class Player {
 	playerRecord [] playerList;
 	
 	abstract public void move();
+	abstract public void setColor(Color color);
+	abstract public String getType();
 
 }
