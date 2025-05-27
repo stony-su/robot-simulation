@@ -1,4 +1,5 @@
 package robotSim;
+import java.util.*;
 
 public class Application {
 	final static int OCTO_NUM = 1;
@@ -7,11 +8,15 @@ public class Application {
 	
 	public static void main (String []args) {
 		Player [] playerArr = new Player [PLAYER_NUM + OCTO_NUM];
+		
+		Random gen = new Random();
 		while (!allPlayersCaught) {
-			for (int i = 0; i < playerArr.length; i++) {
-				playerArr[i].move();
-			}	
-			
+			int randomNum = gen.nextInt(101);
+			if (randomNum == 100) {
+				for (int i = 0; i < playerArr.length; i++) {
+					playerArr[i].move();
+				}	
+			}
 		}
 	}
 	
