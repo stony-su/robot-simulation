@@ -3,6 +3,7 @@ import java.awt.Color;
 
 public abstract class Player {
 	int energyLevel;
+	int maximumEnergyLevel;
 	int stepsPerMove;
 	int dodgingAbility;
 	String name;
