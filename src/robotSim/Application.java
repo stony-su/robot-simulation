@@ -39,7 +39,7 @@ public class Application {
 		double dodge = gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
 		int height = gen.nextInt(11)+1;
 		Direction direction = Direction.EAST;
-		Player octopus = new Octopus (names[names.length], energy, steps, dodge, city, 6, 12, direction);
+		Player octopus = new Octopus (names[names.length], energy, steps, dodge, city, 6, 12	, direction);
 		playerArr[playerArr.length] = octopus;
 		
 		
