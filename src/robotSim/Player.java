@@ -1,26 +1,61 @@
 package robotSim;
-import java.awt.Color;
 import becker.robots.*;
 import java.util.*;
 
-public abstract class Player extends RobotSE{
-	public Player(City city, int y, int x, Direction direction) {
-		super(city, y, x, direction);
-	}
+public abstract class Player extends Robot {
+    private int energyLevel;
+    private int stepsPerMove;
+    private int dodgingAbility;
+    private String name;
 
-	int energyLevel;
-	int maximumEnergyLevel;
-	int stepsPerMove;
-	int dodgingAbility;
-	String name;
+    protected playerRecord[] playerList;
 
-	playerRecord [] playerList;
-	
-	abstract public void move();
-	public void setColor(Color color) {
+    public Player(String name, int energyLevel, int stepsPerMove, int dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
+        this.name = name;
+        this.energyLevel = energyLevel;
+        this.stepsPerMove = stepsPerMove;
+        this.dodgingAbility = dodgingAbility;
+        this.playerList = playerList;
+        super(city, y, x, direction);
+    }
+
+    public abstract void move();
+    public abstract void setColor();
+    public abstract String getType();
+    
+    public void setColor(Color color) {
 		setColor(color);
 	}
-	
-	abstract public String getType();
+    
+    public int getEnergyLevel() {
+        return energyLevel;
+    }
 
+    public void setEnergyLevel(int energyLevel) {
+        this.energyLevel = energyLevel;
+    }
+
+    public int getStepsPerMove() {
+        return stepsPerMove;
+    }
+
+    public void setStepsPerMove(int stepsPerMove) {
+        this.stepsPerMove = stepsPerMove;
+    }
+
+    public int getDodgingAbility() {
+        return dodgingAbility;
+    }
+
+    public void setDodgingAbility(int dodgingAbility) {
+        this.dodgingAbility = dodgingAbility;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
