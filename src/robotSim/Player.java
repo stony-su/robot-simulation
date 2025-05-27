@@ -7,10 +7,10 @@ import java.util.*;
 public abstract class Player extends RobotSE {
     private int energyLevel;
     private int stepsPerMove;
-    private int dodgingAbility;
+    private double dodgingAbility;
     private String name;
 
-    public Player(String name, int energyLevel, int stepsPerMove, int dodgingAbility, City city, int y, int x, Direction direction) {
+    public Player(String name, int energyLevel, int stepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
         super(city, y, x, direction);
     	this.name = name;
         this.energyLevel = energyLevel;
@@ -41,7 +41,7 @@ public abstract class Player extends RobotSE {
         this.stepsPerMove = stepsPerMove;
     }
 
-    public int getDodgingAbility() {
+    public double getDodgingAbility() {
         return dodgingAbility;
     }
 

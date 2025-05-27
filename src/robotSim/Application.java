@@ -22,16 +22,18 @@ public class Application {
 			    "Jesse", "Kai", "Spencer", "Shiloh", "Kendall", "Arden", "Lennon", "River", "Phoenix", "Marlow",
 			    "Lane", "Greer", "Wren", "Indigo", "Micah", "Bailey", "Rowe", "Ellis", "Oakley", "Emery"
 			};
+		
 		Random gen = new Random ();
 		for (int i = 0; i < PLAYER_NUM; i++) {
 			int energy = gen.nextInt(ENERGY_LIMIT-1)+1;
 			int steps = gen.nextInt(STEPS_LIMIT-1)+1;
 			double dodge = gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
-
-			Player runner = new Runner (names[i], energy, steps, dodge)
+			int height = gen.nextInt(11)+1;
+			Direction direction = Direction.EAST;
+			Player runner = new Runner (names[i], energy, steps, dodge, city, height, 0, direction);
 		}
 		
-		Random gen = new Random();
+		
 		while (!allPlayersCaught) {
 			int randomNum = gen.nextInt(101);
 			if (randomNum == 100) {

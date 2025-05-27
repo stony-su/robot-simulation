@@ -12,7 +12,7 @@ public class Runner extends Player {
 	int dodgingAbility;
 	String name;
 
-	public Runner(String name, int energyLevel, int stepsPerMove, int dodgingAbility, City city, int y, int x, Direction direction) {
+	public Runner(String name, int energyLevel, int stepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
 		super(name, energyLevel, stepsPerMove, dodgingAbility, city, y, x, direction);
 	}
 	
