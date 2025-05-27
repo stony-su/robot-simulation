@@ -11,12 +11,12 @@ public abstract class Player extends RobotSE {
     protected playerRecord[] playerList;
 
     public Player(String name, int energyLevel, int stepsPerMove, int dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
-        this.name = name;
+        super(city, y, x, direction);
+    	this.name = name;
         this.energyLevel = energyLevel;
         this.stepsPerMove = stepsPerMove;
         this.dodgingAbility = dodgingAbility;
         this.playerList = playerList;
-        super(city, y, x, direction);
     }
 
     public abstract void move();
