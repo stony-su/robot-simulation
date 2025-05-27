@@ -1,5 +1,7 @@
 package robotSim;
 import becker.robots.*;
+
+import java.awt.Color;
 import java.util.*;
 
 public abstract class Player extends RobotSE {
@@ -20,7 +22,6 @@ public abstract class Player extends RobotSE {
     }
 
     public abstract void move();
-    public abstract void setColor();
     public abstract String getType();
     
     public void setColor(Color color) {
