@@ -2,7 +2,7 @@ package robotSim;
 import becker.robots.*;
 import java.util.*;
 
-public abstract class Player extends Robot {
+public abstract class Player extends RobotSE {
     private int energyLevel;
     private int stepsPerMove;
     private int dodgingAbility;
