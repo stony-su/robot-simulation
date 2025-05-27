@@ -31,7 +31,17 @@ public class Application {
 			int height = gen.nextInt(11)+1;
 			Direction direction = Direction.EAST;
 			Player runner = new Runner (names[i], energy, steps, dodge, city, height, 0, direction);
+			playerArr[i] = runner;
 		}
+		
+		int energy = gen.nextInt(ENERGY_LIMIT-1)+1;
+		int steps = gen.nextInt(STEPS_LIMIT-1)+1;
+		double dodge = gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
+		int height = gen.nextInt(11)+1;
+		Direction direction = Direction.EAST;
+		Player octopus = new Octopus (names[names.length], energy, steps, dodge, city, 6, 12, direction);
+		playerArr[playerArr.length] = octopus;
+		
 		
 		
 		while (!allPlayersCaught) {
