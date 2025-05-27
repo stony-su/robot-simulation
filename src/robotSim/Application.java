@@ -1,5 +1,7 @@
 package robotSim;
 import java.util.*;
+import becker.robots.*;
+import java.util.*;
 
 public class Application {
 	final static int OCTO_NUM = 1;
@@ -7,6 +9,7 @@ public class Application {
 	static boolean allPlayersCaught = false;
 	
 	public static void main (String []args) {
+		City city = new City (12, 24);
 		Player [] playerArr = new Player [PLAYER_NUM + OCTO_NUM];
 		
 		Random gen = new Random();

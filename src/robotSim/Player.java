@@ -22,7 +22,7 @@ public abstract class Player extends RobotSE {
     }
 
     public abstract void move();
-    public abstract String getType();
+    public abstract int getType();
     
     public void setColor(Color color) {
 		setColor(color);
