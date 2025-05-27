@@ -10,7 +10,7 @@ public abstract class Player extends RobotSE {
     private int dodgingAbility;
     private String name;
 
-    protected playerRecord[] playerList;
+   
 
     public Player(String name, int energyLevel, int stepsPerMove, int dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
         super(city, y, x, direction);
