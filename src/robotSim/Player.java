@@ -18,11 +18,11 @@ public abstract class Player extends RobotSE {
         this.dodgingAbility = dodgingAbility;
     }
 
-    public abstract void move();
+    public abstract void takeTurn();
     public abstract int getType();
     
     public void setColor(Color color) {
-		setColor(color);
+		super.setColor(color);
 	}
     
     public int getEnergyLevel() {
