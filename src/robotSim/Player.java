@@ -9,6 +9,8 @@ public abstract class Player extends RobotSE {
     private int maxStepsPerMove;
     private double dodgingAbility;
     private String name;
+    private int y;
+    private int x;
 
     public Player(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
         super(city, y, x, direction);
@@ -58,18 +60,18 @@ public abstract class Player extends RobotSE {
     }
 
     public int getX() {
-        return this.getAvenue();
+        return this.x;
     }
 
     public int getY() {
-        return this.getStreet();
+        return this.y;
     }
 
     public void setX(int x) {
-        this.setAvenue(x);
+        this.x = x;
     }
 
     public void setY(int y) {
-        this.setStreet(y);
+        this.y = y;
     }
 }
