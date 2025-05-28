@@ -4,17 +4,15 @@ public class playerRecord {
     private int enemyX;
     private int enemyY;
     private int dodgeAbility;
-    private int speed;
     private String name;
-    private String type;
+    private int type;
 
-    public playerRecord(int enemyX, int enemyY, String name, String type, int dodgeAbility, int speed) {
+    public playerRecord(int enemyX, int enemyY, String name, int type, int dodgeAbility) {
         this.enemyX = enemyX;
         this.enemyY = enemyY;
         this.name = name;
         this.type = type;
         this.dodgeAbility = dodgeAbility;
-        this.speed = speed;
     }
 
     public int getDodge() {
@@ -33,18 +31,13 @@ public class playerRecord {
         return name;
     }
 
-    public String getType() {
+    public int getType() {
         return type;
     }
-    
-    public int getSpeed() {
-    	return speed;
-    }
 
-    public void updateRecord(int enemyX, int enemyY, int dodgeAbility, int speed) {
+    public void updateRecord(int enemyX, int enemyY, int dodgeAbility) {
         this.enemyX = enemyX;
         this.enemyY = enemyY;
         this.dodgeAbility = dodgeAbility;
-        this.speed = speed;
     }
 }
