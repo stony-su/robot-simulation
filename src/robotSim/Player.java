@@ -12,7 +12,7 @@ public abstract class Player extends RobotSE {
 
     public Player(String name, int energyLevel, int stepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
         super(city, y, x, direction);
-    	this.name = name;
+        this.name = name;
         this.energyLevel = energyLevel;
         this.stepsPerMove = stepsPerMove;
         this.dodgingAbility = dodgingAbility;
@@ -20,11 +20,11 @@ public abstract class Player extends RobotSE {
 
     public abstract void takeTurn();
     public abstract int getType();
-    
+
     public void setColor(Color color) {
-		super.setColor(color);
-	}
-    
+        super.setColor(color);
+    }
+
     public int getEnergyLevel() {
         return energyLevel;
     }
@@ -45,7 +45,7 @@ public abstract class Player extends RobotSE {
         return dodgingAbility;
     }
 
-    public void setDodgingAbility(int dodgingAbility) {
+    public void setDodgingAbility(double dodgingAbility) {
         this.dodgingAbility = dodgingAbility;
     }
 
@@ -55,5 +55,21 @@ public abstract class Player extends RobotSE {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getX() {
+        return this.getAvenue();
+    }
+
+    public int getY() {
+        return this.getStreet();
+    }
+
+    public void setX(int x) {
+        this.setAvenue(x);
+    }
+
+    public void setY(int y) {
+        this.setStreet(y);
     }
 }
