@@ -61,7 +61,11 @@ public class Octopus extends Player {
 	private void lockOnTarget() {
 		this.sortByDistance(playerList);
 		for (int i =0; i < playerList.length; i++) {
-			
+			if (playerList[i].getType() < 3) {
+				this.targetY = playerList[i].getY();
+				this.targetX = playerList[i].getX();
+				this.targetName = playerList[i].getName();
+			}
 		}
 	}
 
@@ -124,4 +128,3 @@ public class Octopus extends Player {
 
 
 }
-
