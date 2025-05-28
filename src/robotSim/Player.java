@@ -6,15 +6,15 @@ import java.util.*;
 
 public abstract class Player extends RobotSE {
     private int energyLevel;
-    private int stepsPerMove;
+    private int maxStepsPerMove;
     private double dodgingAbility;
     private String name;
 
-    public Player(String name, int energyLevel, int stepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
+    public Player(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
         super(city, y, x, direction);
     	this.name = name;
         this.energyLevel = energyLevel;
-        this.stepsPerMove = stepsPerMove;
+        this.maxStepsPerMove = maxStepsPerMove;
         this.dodgingAbility = dodgingAbility;
     }
 
@@ -33,12 +33,12 @@ public abstract class Player extends RobotSE {
         this.energyLevel = energyLevel;
     }
 
-    public int getStepsPerMove() {
-        return stepsPerMove;
+    public int getMaxStepsPerMove() {
+        return maxStepsPerMove;
     }
 
-    public void setStepsPerMove(int stepsPerMove) {
-        this.stepsPerMove = stepsPerMove;
+    public void setStepsPerMove(int maxStepsPerMove) {
+        this.maxStepsPerMove = maxStepsPerMove;
     }
 
     public double getDodgingAbility() {
