@@ -3,6 +3,8 @@ package robotSim;
 import java.awt.*;
 import becker.robots.City;
 import becker.robots.Direction;
+import unit3.Account;
+
 import java.util.*;
 
 public class Octopus extends Player {
@@ -57,10 +59,34 @@ public class Octopus extends Player {
 
 
 	private void lockOnTarget() {
-		this.sortByDistance();
+		this.sortByDistance(playerList);
+		for (int i =0; i < playerList.length; i++) {
+			
+		}
 	}
 
+	private void sortByDistance(playerRecord [] numbersArray) {
+		final int ARRAYLENGTH = numbersArray.length;
+		for (int i = 0; i < ARRAYLENGTH; i++) {
+			for (int j = i; j > 0; j--) {
+				if (distanceCalc(numbersArray[j]) < distanceCalc(numbersArray[j-1])) {
+					swap(j,j-1, numbersArray);
+				}
+			}
+		}
+	}
+	
+	private double distanceCalc(playerRecord player) {
+		return Math.sqrt((player.getX() - this.x)^2 + (player.getY() - this.y));
+	}
+	private static void swap(int pos1, int pos2, playerRecord swapArray[]) {
+		// saving the 2 numbers to temp variables
+		playerRecord swapped1 = swapArray[pos1];
 
+		// swapping the variables
+		swapArray[pos1] = swapArray[pos2];
+		swapArray[pos2] = swapped1;
+	}
 	private void rest() {
 		Random r = new Random();
 		if (this.resting == true) {
@@ -98,3 +124,4 @@ public class Octopus extends Player {
 
 
 }
+
