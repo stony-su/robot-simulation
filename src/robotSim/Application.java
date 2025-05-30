@@ -26,20 +26,21 @@ public class Application {
 		Random gen = new Random ();
 		for (int i = 0; i < PLAYER_NUM; i++) {
 			int energy = gen.nextInt(ENERGY_LIMIT-1)+1;
-			int steps = gen.nextInt(STEPS_LIMIT-1)+1;
+			int maxSteps = gen.nextInt(STEPS_LIMIT-1)+1;
+			int steps = gen.nextInt(STEPS_LIMIT/2-1)+1;
 			double dodge = gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
 			int height = gen.nextInt(11)+1;
 			Direction direction = Direction.EAST;
-			Player runner = new Runner (names[i], energy, steps, dodge, city, height, 0, direction);
+			Player runner = new Runner (names[i], energy, maxSteps, dodge, city, height, 0, direction, steps);
 			playerArr[i] = runner;
 		}
-		
+
 		int energy = gen.nextInt(ENERGY_LIMIT-1)+1;
 		int steps = gen.nextInt(STEPS_LIMIT-1)+1;
 		double dodge = gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
 		int height = gen.nextInt(11)+1;
 		Direction direction = Direction.EAST;
-		Player octopus = new Octopus (names[names.length], energy, steps, dodge, city, 6, 12	, direction);
+		Player octopus = new Octopus (names[names.length], energy, steps, dodge, city, 6, 12, direction);
 		playerArr[playerArr.length] = octopus;
 		
 		
