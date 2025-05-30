@@ -9,28 +9,29 @@ import java.util.*;
 
 public class Octopus extends Player {
 	private int x, y;
-	private int maximumEnergyLevel, stepsPerMove, energyLevel;
+	private int maximumEnergyLevel, maxStepsPerMove, energyLevel;
 	private double dodgingAbility;
+	private boolean chasing = false;
 	private playerRecord[] playerList;
 	private String name;
 	private boolean resting = false;
 	private int targetX, targetY;
 	private double targetDistance;
 	private String targetName;
-	
-	
 
-	public Octopus(String name, int energyLevel, int stepsPerMove, double dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
-		super(name,energyLevel, stepsPerMove, dodgingAbility, city, y, x, direction);
+
+
+	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
+		super(name,energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
 		this.setColor(new Color(255, 165, 0));
 		this.maximumEnergyLevel = energyLevel;
 		this.energyLevel = this.maximumEnergyLevel;
 
 	}
-	
-	
 
-	
+
+
+
 	public void takeTurn() {
 		if (this.sufficientEnergy() && this.resting != true) {
 			this.chase();
@@ -39,29 +40,37 @@ public class Octopus extends Player {
 		}
 
 	}
-	
+
 	private void chase() {
+		this.chasing= true;
 		this.lockOnTarget();
 		this.advanceToTarget();
 		this.energyLevel -= 1;
 		this.tagAttempt();
 	}
-	
-	
+
+
 	private void tagAttempt() {
-		
+
 	}
 
 
 	private void advanceToTarget() {
-		
+
 	}
 
 
 	private void lockOnTarget() {
-		this.sortByDistance(playerList);
-		for (int i =0; i < playerList.length; i++) {
-			
+		if (distanceCalc(playerList[0]) > maxStepsPerMove/energyLevel) {
+			this.sortByDistance(playerList);
+			for (int i =0; i < playerList.length; i++) {
+				if (playerList[i].getType() < 3) {
+					this.targetY = playerList[i].getY();
+					this.targetX = playerList[i].getX();
+					this.targetName = playerList[i].getName();
+				}
+			}
+
 		}
 	}
 
@@ -75,7 +84,7 @@ public class Octopus extends Player {
 			}
 		}
 	}
-	
+
 	private double distanceCalc(playerRecord player) {
 		return Math.sqrt((player.getX() - this.x)^2 + (player.getY() - this.y));
 	}
@@ -98,7 +107,7 @@ public class Octopus extends Player {
 				}
 			}
 		}
-		
+
 	}
 
 	private boolean sufficientEnergy() {
@@ -106,7 +115,7 @@ public class Octopus extends Player {
 			return true;
 		} else {
 			return false;
-			
+
 		}
 	}
 
@@ -120,8 +129,7 @@ public class Octopus extends Player {
 		super.setColor(color);
 	}
 
-	
+
 
 
 }
-
