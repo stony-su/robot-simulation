@@ -29,9 +29,6 @@ public class Octopus extends Player {
 
 	}
 
-
-
-
 	public void takeTurn() {
 		if (this.sufficientEnergy() && this.resting != true) {
 			this.chase();

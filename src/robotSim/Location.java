@@ -1,11 +1,11 @@
 package robotSim;
 
 public class Location {
-	private int dangerLevel;
+	private double dangerLevel;
 	private int x;
 	private int y;
-	public Location (int dangerLevel, int x, int y) {
-		this.dangerLevel = dangerLevel;
+	private int[][] path;
+	public Location (int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
@@ -18,7 +18,19 @@ public class Location {
 		return y;
 	}
 	
-	public int getDanger() {
+	public int[][] getPath(){
+		return path;
+	}
+	
+	public void setDanger(double d) {
+		this.dangerLevel = d;
+	}
+	
+	public void setPath(int [][] arr) {
+		this.path = arr;
+	}
+	
+	public double getDanger() {
 		return dangerLevel;
 	}
 }
