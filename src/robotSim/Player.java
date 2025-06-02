@@ -75,6 +75,11 @@ public abstract class Player extends RobotSE {
     public void setY(int y) {
         this.y = y;
     }
+
+	public void setPlayerRecord(Player[] arr) {
+		// TODO Auto-generated method stub
+		
+	}
     
     
 }
