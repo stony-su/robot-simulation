@@ -78,6 +78,6 @@ public abstract class Player extends RobotSE {
 
 	
 
-	abstract void setPlayerRecord(Player[] arr);
+	abstract void setPlayerRecord(playerRecord [] arr);
     
 }
