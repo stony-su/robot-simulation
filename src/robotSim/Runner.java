@@ -12,7 +12,7 @@ public class Runner extends Player {
 	private Player octopus;
 	private Player[] runnerRecord;
 	private double runnerAvoidance = 0.1;
-	private double octopusAvoidance = 1;
+	private double octopusAvoidance = 2;
 	private boolean isAlgae;
     
 	public Runner(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction, int stepsPerMove, Player octopus) {
@@ -32,6 +32,7 @@ public class Runner extends Player {
 		else
 			isAlgae = true;
 	}
+	
 	public void takeTurn() {
 		if (!isAlgae) {
 			danger =  dangerMap();
@@ -174,7 +175,12 @@ public class Runner extends Player {
 		
 		double distanceFromRunners = 0;
 		for(int i = 0; i < this.runnerRecord.length; i++) {
-			distanceFromRunners = distanceFromRunners + accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
+			if (runnerRecord[i].getType() == 3) {
+				distanceFromRunners = distanceFromRunners + 12 * accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
+			}
+			else {
+				distanceFromRunners = distanceFromRunners + accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
+			}
 		}
 		distanceFromRunners = distanceFromRunners / this.runnerRecord.length;
 		danger = danger + distanceFromRunners * runnerAvoidance;

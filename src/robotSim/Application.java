@@ -52,6 +52,7 @@ public class Application {
 		for (int i = 0; i < PLAYER_NUM; i++) {
 			playerArr[i].setRunnerRecord(runnerArr);
 		}
+		octopus.setPlayerRecord(runnerArr);
 		
 		while (!allPlayersCaught) {
 			int randomNum = gen.nextInt(101);
