@@ -13,20 +13,35 @@ public class Runner extends Player {
 	private Player[] runnerRecord;
 	private double runnerAvoidance = 0.1;
 	private double octopusAvoidance = 1;
+	private boolean isAlgae;
     
 	public Runner(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction, int stepsPerMove, Player octopus) {
 		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
 		this.stepsPerMove = stepsPerMove;
 		this.octopus = octopus;
+		isAlgae = false;
 	}
 	
 	public void setRunnerRecord(Player[] arr) {
 		this.runnerRecord = arr;
 	}
 		
+	public void switchModes(){
+		if (isAlgae)
+			isAlgae = false;
+		else
+			isAlgae = true;
+	}
 	public void takeTurn() {
-		danger =  dangerMap();
-		optimalMove();
+		if (!isAlgae) {
+			danger =  dangerMap();
+			optimalMove();
+		}
+		else {
+			for (int i = 0; i < 4; i++) {
+				this.turnLeft();
+			}
+		}
 	}
 
 	private void optimalMove() {
@@ -173,7 +188,10 @@ public class Runner extends Player {
 	}
 
 	public int getType() {
-		return 2;
+		if (isAlgae)
+			return 3;
+		else
+			return 2;
 	}
 	
 	/**
