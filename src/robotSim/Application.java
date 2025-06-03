@@ -65,7 +65,8 @@ public class Application {
 				
 				if (playerArr[i].getType() == 4) {
 					if (((Octopus)playerArr[i]).getTagging() == true) {
-						
+						String name = ((Octopus)playerArr[i]).getTargetName();
+						triggerTag(name, playerArr);
 					}
 				}
 			}	
@@ -85,12 +86,14 @@ public class Application {
 		
 	}
 	
-	public void triggerTag(String name, Player[] arr) {
+	public static void triggerTag(String name, Player[] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i].getName().equals(name)){
-				
+				double dodge = arr[i].getDodgingAbility();
+				if (Math.random() > dodge) {
+					((Runner)arr[i]).switchModes();
+				}
 			}
 		}
 	}
-	
 }
