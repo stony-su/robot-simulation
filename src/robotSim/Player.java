@@ -75,6 +75,9 @@ public abstract class Player extends RobotSE {
     public void setY(int y) {
         this.y = y;
     }
-    
+
+	
+
+	abstract void setPlayerRecord(playerRecord [] arr);
     
 }
