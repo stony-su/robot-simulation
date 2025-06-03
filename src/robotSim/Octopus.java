@@ -23,7 +23,7 @@ public class Octopus extends Player {
 
 
 
-	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
+	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
 		super(name,energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
 		this.setColor(new Color(255, 165, 0));
 		this.maximumEnergyLevel = energyLevel;
