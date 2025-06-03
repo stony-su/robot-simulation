@@ -50,7 +50,7 @@ public class Application {
 		}
 		
 		for (int i = 0; i < PLAYER_NUM; i++) {
-			playerArr[i].setRunnerRecord(runnerArr);
+			playerArr[i].setPlayerRecord(runnerArr);
 		}
 		
 		octopus.setPlayerRecord(runnerArr);
@@ -60,11 +60,13 @@ public class Application {
 		while (!allPlayersCaught) {
 			for (int i = 0; i < playerArr.length; i++) {
 				recordArr = updateRecords(playerArr);
-				playerArr[i].setRunnerRecord(recordArr);
+				playerArr[i].setPlayerRecord(recordArr);
 				playerArr[i].move();
 				
 				if (playerArr[i].getType() == 4) {
-					if (playerArr[i].)
+					if (((Octopus)playerArr[i]).getTagging() == true) {
+						
+					}
 				}
 			}	
 		}

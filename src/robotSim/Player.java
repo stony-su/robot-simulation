@@ -11,6 +11,7 @@ public abstract class Player extends RobotSE {
     private String name;
     private int y;
     private int x;
+    private playerRecord [] playerList;
 
     public Player(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
         super(city, y, x, direction);
@@ -22,7 +23,9 @@ public abstract class Player extends RobotSE {
 
     public abstract void takeTurn();
     public abstract int getType();
-    public abstract void setRunnerRecord(playerRecord[] runnerArr);
+    public void setPlayerRecord(playerRecord [] arr) {
+		this.playerList = arr;
+	}
 
     public void setColor(Color color) {
         super.setColor(color);
@@ -75,9 +78,5 @@ public abstract class Player extends RobotSE {
     public void setY(int y) {
         this.y = y;
     }
-
-	
-
-	abstract void setPlayerRecord(playerRecord [] arr);
     
 }
