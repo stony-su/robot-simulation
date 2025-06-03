@@ -178,15 +178,6 @@ public class Octopus extends Player {
 		super.setColor(color);
 	}
 
-
-
-
-	public void setPlayerRecord(playerRecord [] arr) {
-		this.playerList = arr;
-
-	}
-
-
 	private void faceSouth() {
 		while (this.isFacingSouth() == false) {
 			this.turnLeft();
@@ -224,17 +215,7 @@ public class Octopus extends Player {
 		}
 	}
 
-	@Override
-	public void setRunnerRecord(Player[] arr) {
-		// TODO Auto-generated method stub
-		
-	}
 
 
-	
-	
-
-	
-	
 
 }
