@@ -23,7 +23,7 @@ public class Octopus extends Player {
 
 
 
-	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
+	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
 		super(name,energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
 		this.setColor(new Color(255, 165, 0));
 		this.maximumEnergyLevel = energyLevel;
@@ -48,7 +48,9 @@ public class Octopus extends Player {
 		}
 	}
 
-
+	public String getTargetName() {
+		return this.targetName;
+	}
 
 	public void takeTurn() {
 		if (this.sufficientEnergy() && this.resting != true) {
@@ -177,6 +179,14 @@ public class Octopus extends Player {
 	}
 
 
+
+
+	public void setPlayerRecord(playerRecord [] arr) {
+		this.playerList = arr;
+
+	}
+
+
 	private void faceSouth() {
 		while (this.isFacingSouth() == false) {
 			this.turnLeft();
@@ -214,5 +224,17 @@ public class Octopus extends Player {
 		}
 	}
 
+	@Override
+	public void setRunnerRecord(Player[] arr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	
+	
+
+	
+	
 
 }
