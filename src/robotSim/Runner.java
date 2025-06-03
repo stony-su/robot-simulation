@@ -67,8 +67,8 @@ public class Runner extends Player {
 		int [][] path = tiles[0].getPath();
 		
 		movePath(path);
-		//super.setX(x);
-		//super.setY(y);
+		super.setX(getStreet());
+		super.setY(getAvenue());
 	}
 
 	private void movePath(int[][] path) {
@@ -163,6 +163,14 @@ public class Runner extends Player {
 	            double predicted = accessDangerXY(targetX, targetY);
 	            dangerMap[dy + (stepsPerMove - 1)][dx + (stepsPerMove - 1)] = predicted;
 	        }
+	    }
+	    
+	    for (int i = 0; i < dangerMap.length; i++) {
+	    	double counter = 1;
+	    	for (int x= 0; x < dangerMap[0].length; x++) {
+	    		dangerMap[i][x] = dangerMap[i][x] * counter;
+	    		counter = counter - 0.05;
+	    	}
 	    }
 	    
 	    return dangerMap;

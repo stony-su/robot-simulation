@@ -4,13 +4,13 @@ import becker.robots.*;
 import java.util.*;
 
 public class Application {
-	final static int OCTO_NUM = 1;
-	final static int PLAYER_NUM = 10;	
-	final static int ENERGY_LIMIT = 10;
-	final static int STEPS_LIMIT = 5;
-	final static double DODGE_LIMIT = 0.7;
-
-	static boolean allPlayersCaught = false;
+	private final static int OCTO_NUM = 1;
+	private final static int PLAYER_NUM = 10;	
+	private final static int ENERGY_LIMIT = 10;
+	private final static int STEPS_LIMIT = 5;
+	private final static double DODGE_LIMIT = 0.7;
+	private static boolean allPlayersCaught = false;
+	private boolean tag = false;
 	
 	public static void main (String []args) {
 		City city = new City (12, 24);
@@ -44,27 +44,51 @@ public class Application {
 			playerArr[i] = runner;
 		}
 		
-		Player [] runnerArr = new Player[PLAYER_NUM];
+		playerRecord [] runnerArr = new playerRecord[PLAYER_NUM];
 		for (int i = 0; i < PLAYER_NUM; i++) {
-			runnerArr[i] = playerArr [i];
+			runnerArr[i] = new playerRecord (playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
 		}
 		
 		for (int i = 0; i < PLAYER_NUM; i++) {
 			playerArr[i].setRunnerRecord(runnerArr);
 		}
-		octopus.setPlayerRecord(runnerArr);
 		
+		octopus.setPlayerRecord(runnerArr);
+		playerRecord[] recordArr = runnerArr;
+		
+		//main game loop
 		while (!allPlayersCaught) {
-			int randomNum = gen.nextInt(101);
-			if (randomNum == 100) {
-				for (int i = 0; i < playerArr.length; i++) {
-					playerArr[i].move();
-				}	
+			for (int i = 0; i < playerArr.length; i++) {
+				recordArr = updateRecords(playerArr);
+				playerArr[i].setRunnerRecord(recordArr);
+				playerArr[i].move();
+				
+				if (playerArr[i].getType() == 4) {
+					if (playerArr[i].)
+				}
+			}	
+		}
+	}
+	
+	private static playerRecord[] updateRecords(Player[] playerArr) {
+		playerRecord [] runnerArr = new playerRecord[PLAYER_NUM];
+		for (int i = 0; i < playerArr.length; i++) {
+			runnerArr[i] = new playerRecord (playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
+		}
+		return runnerArr;
+	}
+
+	public void updateStatus (boolean allPlayersCaught) {
+		this.allPlayersCaught = allPlayersCaught;
+		
+	}
+	
+	public void triggerTag(String name, Player[] arr) {
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i].getName().equals(name)){
+				
 			}
 		}
 	}
 	
-	public void updateStatus (boolean allPlayersCaught) {
-		this.allPlayersCaught = allPlayersCaught;
-	}
 }

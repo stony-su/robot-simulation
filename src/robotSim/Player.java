@@ -22,7 +22,7 @@ public abstract class Player extends RobotSE {
 
     public abstract void takeTurn();
     public abstract int getType();
-    public abstract void setRunnerRecord(Player[] arr);
+    public abstract void setRunnerRecord(playerRecord[] runnerArr);
 
     public void setColor(Color color) {
         super.setColor(color);
