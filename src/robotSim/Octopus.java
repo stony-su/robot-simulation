@@ -118,6 +118,7 @@ public class Octopus extends Player {
 					this.targetY = playerList[i].getY();
 					this.targetX = playerList[i].getX();
 					this.targetName = playerList[i].getName();
+					break;
 				} else { // if no medic then find other players
 					for (int j =0; i < playerList.length; i++) {
 						if (playerList[j].getType() < 3) {
@@ -145,7 +146,7 @@ public class Octopus extends Player {
 	}
 
 	private double distanceCalc(playerRecord player) {
-		return Math.sqrt((player.getX() - this.x)^2 + (player.getY() - this.y));
+		return Math.sqrt(Math.pow((player.getX() - this.x),2) + Math.pow((player.getY() - this.y),2));
 	}
 	private static void swap(int pos1, int pos2, playerRecord swapArray[]) {
 		// saving the 2 numbers to temp variables
