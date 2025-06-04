@@ -6,11 +6,9 @@ import java.util.*;
 
 
 public class Runner extends Player {
-    private playerRecord[] playerList;
 	private int stepsPerMove;
-	private double[][] danger;
 	private Player octopus;
-	private Player[] runnerRecord;
+	private playerRecord[] runnerRecord;
 	private double runnerAvoidance = 0.1;
 	private double octopusAvoidance = 2;
 	private boolean isAlgae;
@@ -24,10 +22,6 @@ public class Runner extends Player {
 		this.octopus = octopus;
 		isAlgae = false;
 	}
-	
-	public void setRunnerRecord(Player[] arr) {
-		this.runnerRecord = arr;
-	}
 		
 	public void switchModes(){
 		if (isAlgae)
@@ -38,6 +32,7 @@ public class Runner extends Player {
 	
 	public void takeTurn() {
 		if (!isAlgae) {
+			this.runnerRecord = super.getPlayerRecord();
 			optimalMove();
 		}
 		else {
@@ -295,4 +290,19 @@ public class Runner extends Player {
 		}
 	}
 
+	public static void printState() {
+		System.out.println("------------------------------------");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("-                                  -");
+		System.out.println("------------------------------------");
+
+	}
 }

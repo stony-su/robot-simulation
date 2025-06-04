@@ -1,7 +1,7 @@
 package robotSim;
 import java.util.*;
 import becker.robots.*;
-import java.util.*;
+
 
 public class Application {
 	private final static int OCTO_NUM = 1;

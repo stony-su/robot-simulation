@@ -3,10 +3,8 @@ package robotSim;
 import java.awt.*;
 import becker.robots.City;
 import becker.robots.Direction;
-import unit3.Account;
+import java.util.*;
 
-import java.util.*;
-import java.util.*;
 public class Octopus extends Player {
 	Random gen = new Random();
 	private int x, y;
@@ -23,13 +21,17 @@ public class Octopus extends Player {
 
 
 
-	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, playerRecord[] playerList, City city, int y, int x, Direction direction) {
+	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
 		super(name,energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
 		this.setColor(new Color(255, 165, 0));
 		this.maximumEnergyLevel = energyLevel;
 		this.energyLevel = this.maximumEnergyLevel;
 
 
+	}
+	
+	public String getTargetName() {
+		return "";
 	}
 
 	public void move() {
@@ -231,16 +233,6 @@ public class Octopus extends Player {
 			this.turnRight();
 		}
 	}
-
-	@Override
-	public void setRunnerRecord(Player[] arr) {
-		// TODO Auto-generated method stub
-
-	}
-
-
-
-
 
 
 
