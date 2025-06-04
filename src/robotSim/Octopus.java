@@ -48,9 +48,7 @@ public class Octopus extends Player {
 		}
 	}
 
-	public String getTargetName() {
-		return this.targetName;
-	}
+
 
 	public void takeTurn() {
 		if (this.sufficientEnergy() && this.resting != true) {
