@@ -26,6 +26,10 @@ public abstract class Player extends RobotSE {
     public void setPlayerRecord(playerRecord [] arr) {
 		this.playerList = arr;
 	}
+    
+    public playerRecord[] getPlayerRecord() {
+    	return this.playerList;
+    }
 
     public void setColor(Color color) {
         super.setColor(color);

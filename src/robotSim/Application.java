@@ -69,6 +69,7 @@ public class Application {
 						triggerTag(name, playerArr);
 					}
 				}
+				updateStatus (playerArr);
 			}	
 		}
 	}
@@ -81,12 +82,15 @@ public class Application {
 		return runnerArr;
 	}
 
-	public void updateStatus (boolean allPlayersCaught) {
-		this.allPlayersCaught = allPlayersCaught;
-		
+	private static void updateStatus (Player[] arr) {
+		for (int i = 0; i<arr.length-1; i++) {
+			if (arr[i].getType() != 3)
+				return;
+		}
+		allPlayersCaught = true;
 	}
 	
-	public static void triggerTag(String name, Player[] arr) {
+	private static void triggerTag(String name, Player[] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i].getName().equals(name)){
 				double dodge = arr[i].getDodgingAbility();
