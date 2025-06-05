@@ -14,7 +14,7 @@ public class Runner extends Player {
 	private boolean isAlgae;
 	private boolean goingLeft = false;
 	private final int CITY_LENGTH = 24;
-	private final double TRAVEL_IMPORTANCE = 0.95;
+	private final double TRAVEL_IMPORTANCE = 0.99;
     
 	public Runner(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction, int stepsPerMove, Player octopus) {
 		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
@@ -43,8 +43,8 @@ public class Runner extends Player {
 	}
 
 	private void optimalMove() {
-		int x = super.getX();
-		int y = super.getY();
+		int x = getAvenue();
+		int y = getStreet();
 		int formulaLoops = 1 + 2*(stepsPerMove);
 		Location [] tiles = new Location [formulaLoops];
 		int xShift = 0;
@@ -65,18 +65,47 @@ public class Runner extends Player {
 		}
 		
 		Location location = predictTileDanger(x+stepsPerMove,y+stepsPerMove+1, 0, new Location (x+stepsPerMove, y+stepsPerMove+1));
-		tiles[tiles.length] = location;
+		tiles[tiles.length-1] = location;
 		
 		tiles = insertionSort(tiles);
-		int [][] path = tiles[tiles.length].getPath();
+		printTiles(tiles);
+		//int [][] path = tiles[tiles.length-1].getPath();
+		int [][] path = tiles[0].getPath();
 		
 		movePath(path);
 		super.setX(getAvenue());
 		super.setY(getStreet());
 	}
+	private void printTiles(Location[] tiles) {
+	    System.out.println("==== Tiles Info ====");
+	    for (int i = 0; i < tiles.length; i++) {
+	        if (tiles[i] == null) {
+	            System.out.println("Tile " + i + ": null");
+	            continue;
+	        }
+
+	        System.out.println("Tile " + i + ":");
+	        System.out.println("  Coordinates: (" + tiles[i].getX() + ", " + tiles[i].getY() + ")");
+	        System.out.println("  Danger Level: " + tiles[i].getDanger());
+
+	        int[][] path = tiles[i].getPath();
+	        System.out.print("  Path: ");
+	        if (path != null) {
+	            for (int j = 0; j < path.length; j++) {
+	                if (path[j][0] == 0 && path[j][1] == 0 && j != 0) break; // assume 0,0 is default filler
+	                System.out.print("-> (" + path[j][0] + ", " + path[j][1] + ") ");
+	            }
+	        } else {
+	            System.out.print("null");
+	        }
+	        System.out.println("\n");
+	    }
+	    System.out.println("=====================");
+	}
+
 
 	private void movePath(int[][] path) {
-		for (int i = path.length; i > 0; i++) {
+		for (int i = path.length-1; i > 0; i++) {
 			int x = path[i][0];
 			int y = path[i][1];
 			moveTo(x,y);
@@ -95,43 +124,42 @@ public class Runner extends Player {
 		}
 
 		while(getStreet() > y) {
-			pointSouth();
+			pointNorth();
 			move();
 		}
 		
 		while (getStreet() < y) {
-			pointNorth();
+			pointSouth();
 			move();
 		}
 	}
 
 	private Location[] insertionSort(Location[] tiles) {
-		
-		for (int i = 1; i < tiles.length; ++i) {
+	    for (int i = 1; i < tiles.length; ++i) {
 	        Location key = tiles[i];
-	        double keyValue = tiles[i].getDanger();
 	        int j = i - 1;
 
-	        while (j >= 0 && tiles[j].getDanger() > keyValue) {
+	        while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
 	            tiles[j + 1] = tiles[j];
 	            j = j - 1;
 	        }
 	        tiles[j + 1] = key;
 	    }
-		
-		return tiles;
+	    return tiles;
 	}
 
+
 	private Location predictTileDanger(int xTarget, int yTarget, int step, Location tile) {
-		int x = super.getX();
-		int y = super.getY();
+		int x = getAvenue();
+		int y = getStreet();
 		if (x == xTarget && y == yTarget) {
 			tile.setDanger(0);
 			return tile;
 		}
 		
 		if (step == 0) {
-			tile.setPath(new int [stepsPerMove][2]);
+			//tile.setPath(new int [stepsPerMove][2]);
+			tile.setPath(new int [20][2]);
 		}
 		
 		double totalXDanger = 0;
