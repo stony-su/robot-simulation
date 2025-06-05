@@ -33,13 +33,8 @@ public class Octopus extends Player {
 	}
 
 	public void move() {
-		// override of the super method from robot
-		// if in the chasing state, then generate a random number based on the max steps per move
-		// if the random generated number is at the max steps per move then consume 2 energy
-		// else consume 1 energy
-		// if not chasing then move 1
+
 		if (this.chasing) {
-			
 			int stepsNum = this.gen.nextInt(maxStepsPerMove);
 			super.move(maxStepsPerMove);
 			if (stepsNum == maxStepsPerMove) {
@@ -54,10 +49,8 @@ public class Octopus extends Player {
 	}
 
 
-	
+
 	public void takeTurn() {
-		// if sufficient energy and not resting then chase
-		// otherwise there's not enough energy and you need to rest
 		if (this.sufficientEnergy() && this.resting != true) {
 			this.chase();
 		} else {
@@ -65,14 +58,8 @@ public class Octopus extends Player {
 		}
 
 	}
-	
-	
+
 	private void chase() {
-		// first lock on to a target
-		// then advance to it
-		// then do a tag attempt
-		// after the attempt set tagging to false
-		// rest after trying to tag
 		this.lockOnTarget();
 		this.advanceToTarget();
 		this.tagAttempt();
@@ -80,21 +67,16 @@ public class Octopus extends Player {
 		this.rest();
 	}
 
-	
-	
+
 	private void tagAttempt() {
-		// simply sets the tagging state to true
 		this.tagging = true;
 	}
 
 	public boolean getTagging() {
-		// returns if you're currently tagging
 		return this.tagging;
 	}
 
 	private void advanceToTarget() {
-		
-		// basically aligning the x position then moving to the y position
 		if (this.targetX != x) {
 			if (this.targetX < x) {
 				this.faceWest();
@@ -125,7 +107,6 @@ public class Octopus extends Player {
 
 
 	private void lockOnTarget() {
-		// if you're not chasing anyone then sort the list by distance
 		if (this.chasing == false) {	
 			this.sortByDistance(playerList);
 			this.chasing = true;
