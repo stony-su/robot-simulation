@@ -202,7 +202,7 @@ public class Octopus extends Player {
 
 
 	public void setPlayerRecord(playerRecord [] arr) {
-		this.playerList = arr;
+		super.playerList = arr;
 
 	}
 
