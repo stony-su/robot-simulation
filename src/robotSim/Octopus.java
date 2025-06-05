@@ -12,7 +12,6 @@ public class Octopus extends Player {
 	private int x, y;
 	private int maximumEnergyLevel, maxStepsPerMove, energyLevel;
 	private double dodgingAbility;
-	private playerRecord[] playerList;
 	private String name;
 	private boolean resting = false;
 	private boolean chasing = false;
@@ -67,7 +66,9 @@ public class Octopus extends Player {
 		this.rest();
 	}
 
-
+	public String getTargetName() {
+		return this.targetName;
+	}
 	private void tagAttempt() {
 		this.tagging = true;
 	}
@@ -108,21 +109,21 @@ public class Octopus extends Player {
 
 	private void lockOnTarget() {
 		if (this.chasing == false) {	
-			this.sortByDistance(playerList);
+			this.sortByDistance(super.playerList);
 			this.chasing = true;
 			// first looking for medic
 			for (int i =0; i < playerList.length; i++) {
-				if (playerList[i].getType() == 1) {
-					this.targetY = playerList[i].getY();
-					this.targetX = playerList[i].getX();
-					this.targetName = playerList[i].getName();
+				if (super.playerList[i].getType() == 1) {
+					this.targetY = super.playerList[i].getY();
+					this.targetX = super.playerList[i].getX();
+					this.targetName = super.playerList[i].getName();
 					break;
 				} else { // if no medic then find other players
-					for (int j =0; i < playerList.length; i++) {
-						if (playerList[j].getType() < 3) {
-							this.targetY = playerList[j].getY();
-							this.targetX = playerList[j].getX();
-							this.targetName = playerList[j].getName();
+					for (int j =0; i < super.playerList.length; i++) {
+						if (super.playerList[j].getType() < 3) {
+							this.targetY = super.playerList[j].getY();
+							this.targetX = super.playerList[j].getX();
+							this.targetName = super.playerList[j].getName();
 						}
 					}
 
@@ -233,11 +234,7 @@ public class Octopus extends Player {
 		}
 	}
 
-	@Override
-	public void setRunnerRecord(Player[] arr) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 
 
