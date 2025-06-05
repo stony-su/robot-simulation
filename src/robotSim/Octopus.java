@@ -69,6 +69,16 @@ public class Octopus extends Player {
 	public String getTargetName() {
 		return this.targetName;
 	}
+	
+	public boolean getChasing() {
+		return this.chasing; 
+	}
+	public int getTargetX() {
+		return this.targetX; 
+	}
+	public int getTargetY() {
+		return this.targetY; 
+	}
 	private void tagAttempt() {
 		this.tagging = true;
 	}
