@@ -1,43 +1,86 @@
-package robotSim;
+package robotSimCopy;
+import becker.robots.*;
 
-public class playerRecord {
-    private int enemyX;
-    private int enemyY;
-    private int dodgeAbility;
+import java.awt.Color;
+import java.util.*;
+
+public abstract class Player extends RobotSE {
+    private int energyLevel;
+    private int maxStepsPerMove;
+    private double dodgingAbility;
     private String name;
-    private int type;
+    private int y;
+    private int x;
+    protected playerRecord [] playerList;
 
-    public playerRecord(int enemyX, int enemyY, String name, int type, int dodgeAbility) {
-        this.enemyX = enemyX;
-        this.enemyY = enemyY;
+    public Player(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
+        super(city, y, x, direction);
         this.name = name;
-        this.type = type;
-        this.dodgeAbility = dodgeAbility;
+        this.energyLevel = energyLevel;
+        this.maxStepsPerMove = maxStepsPerMove;
+        this.dodgingAbility = dodgingAbility;
     }
 
-    public int getDodge() {
-        return dodgeAbility;
+    public abstract void takeTurn();
+    public abstract int getType();
+    public void setPlayerRecord(playerRecord [] arr) {
+		this.playerList = arr;
+	}
+    
+    public playerRecord[] getPlayerRecord() {
+    	return this.playerList;
     }
 
-    public int getX() {
-        return enemyX;
+    public void setColor(Color color) {
+        super.setColor(color);
     }
 
-    public int getY() {
-        return enemyY;
+    public int getEnergyLevel() {
+        return energyLevel;
+    }
+
+    public void setEnergyLevel(int energyLevel) {
+        this.energyLevel = energyLevel;
+    }
+
+    public int getMaxStepsPerMove() {
+        return maxStepsPerMove;
+    }
+
+    public void setStepsPerMove(int maxStepsPerMove) {
+        this.maxStepsPerMove = maxStepsPerMove;
+    }
+
+    public double getDodgingAbility() {
+        return dodgingAbility;
+    }
+
+    public void setDodgingAbility(double dodgingAbility) {
+        this.dodgingAbility = dodgingAbility;
     }
 
     public String getName() {
         return name;
     }
 
-    public int getType() {
-        return type;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void updateRecord(int enemyX, int enemyY, int dodgeAbility) {
-        this.enemyX = enemyX;
-        this.enemyY = enemyY;
-        this.dodgeAbility = dodgeAbility;
+    public int getX() {
+        return this.x;
     }
+
+    public int getY() {
+        return this.y;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+    
 }

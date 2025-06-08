@@ -1,4 +1,4 @@
-package robotSim;
+package robotSimCopy;
 
 public class Location {
 	private double dangerLevel;
