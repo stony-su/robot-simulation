@@ -78,6 +78,9 @@ public class Runner extends Player {
 		printTiles(tiles);
 		//int [][] path = tiles[tiles.length-1].getPath();
 		int [][] path = tiles[0].getPath();
+		printTiles(tiles);
+		//int [][] path = tiles[tiles.length-1].getPath();
+		int [][] path = tiles[0].getPath();
 		
 		movePath(path);
 	}
@@ -151,15 +154,18 @@ public class Runner extends Player {
 
 	private Location[] insertionSort(Location[] tiles) {
 	    for (int i = 1; i < tiles.length; ++i) {
+	    for (int i = 1; i < tiles.length; ++i) {
 	        Location key = tiles[i];
 	        int j = i - 1;
 
+	        while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
 	        while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
 	            tiles[j + 1] = tiles[j];
 	            j = j - 1;
 	        }
 	        tiles[j + 1] = key;
 	    }
+	    return tiles;
 	    return tiles;
 	}
 	

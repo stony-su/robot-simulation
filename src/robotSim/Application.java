@@ -19,6 +19,7 @@ public class Application {
 	public static void main (String []args) {
 		City city = new City (12, 24);
 		createWalls(city);
+		createWalls(city);
 		Player [] playerArr = new Player [PLAYER_NUM + OCTO_NUM];
 		String[] names = {
 			    "Alex", "Jamie", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Drew", "Cameron", "Skyler",
@@ -33,8 +34,11 @@ public class Application {
 		int energy = gen.nextInt(ENERGY_LIMIT-1)+1;
 		int steps = gen.nextInt(STEPS_LIMIT-1)+1;
 		double dodge = 0;//gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
+		double dodge = 0;//gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
 		int height = gen.nextInt(11)+1;
 		Direction direction = Direction.EAST;
+		Player octopus = new Octopus (names[names.length-1], energy, steps, dodge, city, 6, 12, Direction.WEST);
+		playerArr[playerArr.length-1] = octopus;
 		Player octopus = new Octopus (names[names.length-1], energy, steps, dodge, city, 6, 12, Direction.WEST);
 		playerArr[playerArr.length-1] = octopus;
 		
@@ -42,6 +46,7 @@ public class Application {
 			energy = gen.nextInt(ENERGY_LIMIT-1)+1;
 			int maxSteps = gen.nextInt(STEPS_LIMIT-1)+1;
 			steps = gen.nextInt(STEPS_LIMIT/2-1)+1;
+			dodge = 0;//(Math.random(DODGE_LIMIT*10-1)+1)/10;
 			dodge = 0;//(Math.random(DODGE_LIMIT*10-1)+1)/10;
 			height = gen.nextInt(11)+1;
 			direction = Direction.EAST;
@@ -76,7 +81,9 @@ public class Application {
 				
 				if (playerArr[i].getType() == 4) {
 					//System.out.println(((Octopus)playerArr[i]).getTargetX());
+					//System.out.println(((Octopus)playerArr[i]).getTargetX());
 					if (((Octopus)playerArr[i]).getTagging() == true) {
+						//System.out.println("Tagged target");
 						//System.out.println("Tagged target");
 						String name = ((Octopus)playerArr[i]).getTargetName();
 						triggerTag(name, playerArr);
