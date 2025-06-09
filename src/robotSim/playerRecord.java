@@ -1,86 +1,46 @@
 package robotSimCopy;
-import becker.robots.*;
 
-import java.awt.Color;
-import java.util.*;
-
-public abstract class Player extends RobotSE {
-    private int energyLevel;
-    private int maxStepsPerMove;
-    private double dodgingAbility;
+public class playerRecord {
+    private int enemyX;
+    private int enemyY;
+    private int dodgeAbility;
     private String name;
-    private int y;
-    private int x;
-    protected playerRecord [] playerList;
+    private int type;
 
-    public Player(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
-        super(city, y, x, direction);
+    public playerRecord(int enemyX, int enemyY, String name, int type, int dodgeAbility) {
+        this.enemyX = enemyX;
+        this.enemyY = enemyY;
         this.name = name;
-        this.energyLevel = energyLevel;
-        this.maxStepsPerMove = maxStepsPerMove;
-        this.dodgingAbility = dodgingAbility;
+        this.type = type;
+        this.dodgeAbility = dodgeAbility;
     }
-
-    public abstract void takeTurn();
-    public abstract int getType();
-    public void setPlayerRecord(playerRecord [] arr) {
-		this.playerList = arr;
-	}
     
-    public playerRecord[] getPlayerRecord() {
-    	return this.playerList;
+    public String toString() {
+    	return "This is a playerRecord at X " + this.enemyX + "and Y " + this.enemyY + " called " + this.name + "of type number " + this.type;
+    }
+    public int getDodge() {
+        return dodgeAbility;
     }
 
-    public void setColor(Color color) {
-        super.setColor(color);
+    public int getX() {
+        return enemyX;
     }
 
-    public int getEnergyLevel() {
-        return energyLevel;
-    }
-
-    public void setEnergyLevel(int energyLevel) {
-        this.energyLevel = energyLevel;
-    }
-
-    public int getMaxStepsPerMove() {
-        return maxStepsPerMove;
-    }
-
-    public void setStepsPerMove(int maxStepsPerMove) {
-        this.maxStepsPerMove = maxStepsPerMove;
-    }
-
-    public double getDodgingAbility() {
-        return dodgingAbility;
-    }
-
-    public void setDodgingAbility(double dodgingAbility) {
-        this.dodgingAbility = dodgingAbility;
+    public int getY() {
+        return enemyY;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public int getType() {
+        return type;
     }
 
-    public int getX() {
-        return this.x;
+    public void updateRecord(int enemyX, int enemyY, int dodgeAbility) {
+        this.enemyX = enemyX;
+        this.enemyY = enemyY;
+        this.dodgeAbility = dodgeAbility;
     }
-
-    public int getY() {
-        return this.y;
-    }
-
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public void setY(int y) {
-        this.y = y;
-    }
-    
 }

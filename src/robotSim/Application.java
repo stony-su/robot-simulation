@@ -19,7 +19,6 @@ public class Application {
 	public static void main (String []args) {
 		City city = new City (12, 24);
 		createWalls(city);
-		createWalls(city);
 		Player [] playerArr = new Player [PLAYER_NUM + OCTO_NUM];
 		String[] names = {
 			    "Alex", "Jamie", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Drew", "Cameron", "Skyler",
@@ -34,19 +33,15 @@ public class Application {
 		int energy = gen.nextInt(ENERGY_LIMIT-1)+1;
 		int steps = gen.nextInt(STEPS_LIMIT-1)+1;
 		double dodge = 0;//gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
-		double dodge = 0;//gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
 		int height = gen.nextInt(11)+1;
 		Direction direction = Direction.EAST;
-		Player octopus = new Octopus (names[names.length-1], energy, steps, dodge, city, 6, 12, Direction.WEST);
-		playerArr[playerArr.length-1] = octopus;
-		Player octopus = new Octopus (names[names.length-1], energy, steps, dodge, city, 6, 12, Direction.WEST);
+		Player octopus = new Octopus (names[names.length-1], energy, 5, dodge, city, 6, 12, Direction.WEST);
 		playerArr[playerArr.length-1] = octopus;
 		
 		for (int i = 0; i < PLAYER_NUM; i++) {
 			energy = gen.nextInt(ENERGY_LIMIT-1)+1;
 			int maxSteps = gen.nextInt(STEPS_LIMIT-1)+1;
 			steps = gen.nextInt(STEPS_LIMIT/2-1)+1;
-			dodge = 0;//(Math.random(DODGE_LIMIT*10-1)+1)/10;
 			dodge = 0;//(Math.random(DODGE_LIMIT*10-1)+1)/10;
 			height = gen.nextInt(11)+1;
 			direction = Direction.EAST;
@@ -76,15 +71,17 @@ public class Application {
 				recordArr = updateRecords(playerArr);
 				playerArr[i].setPlayerRecord(recordArr);
 				
-				if (i != playerArr.length-1 && !onWall(playerArr[i]))
+				if (playerArr[i].getType() != 4 && !onWall(playerArr[i])) {
 					playerArr[i].takeTurn();
-				
+				}
+				if (playerArr[i].getType() == 4) {
+					playerArr[i].takeTurn();
+			}
 				if (playerArr[i].getType() == 4) {
 					//System.out.println(((Octopus)playerArr[i]).getTargetX());
-					//System.out.println(((Octopus)playerArr[i]).getTargetX());
+					System.out.println("am tagging (app): "+ ((Octopus)playerArr[i]).getTagging());
 					if (((Octopus)playerArr[i]).getTagging() == true) {
-						//System.out.println("Tagged target");
-						//System.out.println("Tagged target");
+						System.out.println("Tagged target!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 						String name = ((Octopus)playerArr[i]).getTargetName();
 						triggerTag(name, playerArr);
 					}
@@ -162,6 +159,7 @@ public class Application {
 	private static void triggerTag(String name, Player[] arr) {
 		for (int i = 0; i < arr.length; i++) {
 			if (arr[i].getName().equals(name)){
+				
 				double dodge = arr[i].getDodgingAbility();
 				if (Math.random() > dodge) {
 					((Runner)arr[i]).switchModes();

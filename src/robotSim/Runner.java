@@ -9,34 +9,61 @@ public class Runner extends Player {
 	private int stepsPerMove;
 	private Player octopus;
 	private playerRecord[] runnerRecord;
-	private double runnerAvoidance = 0.001;
-	private double octopusAvoidance = 0.008;
+	private double runnerAvoidance = 0.00025;
+	private double octopusAvoidance = 0.009;
 	private double algaeAvoidance = 0.1;
 	private boolean isAlgae;
 	private boolean goingLeft = false;
 	private final int CITY_LENGTH = 24;
 	private final double TRAVEL_IMPORTANCE = 0.01;
-    
+	private int energyCap;
+	private int energyHeld;
+	private int energyRecovery;
+	private int minStartle;
+	private static final int MIN_STARTLE_MAX = 10;
+	private static final int MIN_STARTLE_MIN = 3;
+
 	public Runner(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction, int stepsPerMove, Player octopus) {
-		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
+		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, 6, x, direction);
 		this.stepsPerMove = stepsPerMove;
 		this.octopus = octopus;
 		isAlgae = false;
+		Random gen = new Random();
+		this.minStartle = gen.nextInt(MIN_STARTLE_MAX-MIN_STARTLE_MIN)+MIN_STARTLE_MIN;
+		this.energyRecovery = stepsPerMove;
+		this.energyCap = energyLevel;
+		this.energyHeld = energyLevel;
+		super.setLabel(super.getName());
 	}
 		
 	public void switchModes(){
-		if (isAlgae)
+		if (isAlgae) {
 			isAlgae = false;
-		else
+			super.setColor(Color.GREEN);
+		}
+		else {
 			isAlgae = true;
+			super.setColor(Color.BLUE);
+		}
 	}
 	
 	public void takeTurn() {
 		super.setX(getAvenue());
 		super.setY(getStreet());
+		
 		if (!isAlgae) {
+			if (energyHeld < energyCap)
+				energyHeld = energyHeld + energyRecovery;
+			
+			double distanceFromOctopus = accessDistance(getAvenue(), getStreet(), octopus.getX(), octopus.getY());
+			if (distanceFromOctopus < minStartle && energyHeld > energyCap/3)
+				stepsPerMove = super.getMaxStepsPerMove();
+			else
+				stepsPerMove = energyRecovery;
+			
 			this.runnerRecord = super.getPlayerRecord();
 			optimalMove();
+			energyHeld = energyHeld - stepsPerMove;
 		}
 		else {
 			for (int i = 0; i < 4; i++) {
@@ -48,7 +75,7 @@ public class Runner extends Player {
 	private void optimalMove() {
 		int x = getAvenue();
 		int y = getStreet();
-		this.printState();
+		//this.printState();
 		int formulaLoops = 1 + 2*(stepsPerMove);
 		Location [] tiles = new Location [formulaLoops];
 		int xShift = 0;
@@ -60,7 +87,7 @@ public class Runner extends Player {
 				tiles[i+1] = predictTileDanger(x+xShift,y-yShift, 0, new Location (x+xShift, y-yShift));
 			}
 			else {
-				System.out.println("going left");
+				//System.out.println("going left");
 				tiles[i] = predictTileDanger(x-xShift,y+yShift, 0, new Location (x-xShift, y+yShift));
 				tiles[i+1] = predictTileDanger(x-xShift,y-yShift, 0, new Location (x-xShift, y-yShift));
 			}
@@ -75,10 +102,7 @@ public class Runner extends Player {
 		}
 		
 		tiles = insertionSort(tiles);
-		printTiles(tiles);
-		//int [][] path = tiles[tiles.length-1].getPath();
-		int [][] path = tiles[0].getPath();
-		printTiles(tiles);
+		//printTiles(tiles);
 		//int [][] path = tiles[tiles.length-1].getPath();
 		int [][] path = tiles[0].getPath();
 		
@@ -121,11 +145,11 @@ public class Runner extends Player {
 
 
 	private void movePath(int[][] path) {
-		System.out.println("path length:" + path.length);
+		//System.out.println("path length:" + path.length);
 		for (int i = path.length; i > 0; i--) {
 			int x = path[i-1][0];
 			int y = path[i-1][1];
-			System.out.println("Moving to:" + x + ", " + y);
+			//System.out.println("Moving to:" + x + ", " + y);
 			moveTo(x,y);
 		}
 	}
@@ -154,18 +178,15 @@ public class Runner extends Player {
 
 	private Location[] insertionSort(Location[] tiles) {
 	    for (int i = 1; i < tiles.length; ++i) {
-	    for (int i = 1; i < tiles.length; ++i) {
 	        Location key = tiles[i];
 	        int j = i - 1;
 
-	        while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
 	        while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
 	            tiles[j + 1] = tiles[j];
 	            j = j - 1;
 	        }
 	        tiles[j + 1] = key;
 	    }
-	    return tiles;
 	    return tiles;
 	}
 	
@@ -193,12 +214,12 @@ public class Runner extends Player {
 	private Location predictTileDanger(int xTarget, int yTarget, int step, Location tile) {
 		int x = getAvenue();
 		int y = getStreet();
-		System.out.println("you are at:" + x + ", " + y);
-		System.out.println("target is: " + xTarget + ", " + yTarget);
+		//System.out.println("you are at:" + x + ", " + y);
+		//System.out.println("target is: " + xTarget + ", " + yTarget);
 		
 		if (x == xTarget && y == yTarget) {
-			System.out.println("recursed back");
-			System.out.println("==============================");
+			//System.out.println("recursed back");
+			//System.out.println("==============================");
 			tile.setDanger(0);
 			return tile;
 		}
@@ -228,11 +249,11 @@ public class Runner extends Player {
 		if (x != xTarget) {
 			
 				if (!goingLeft) {
-					System.out.println("Moved back one");
+					//System.out.println("Moved back one");
 			        tile = predictTileDanger(xTarget - 1, yTarget, step+1, tile);
 			    } 
 				else {
-					System.out.println("Moved foward one");
+					//System.out.println("Moved foward one");
 			        tile = predictTileDanger(xTarget + 1, yTarget, step+1, tile);
 			    }
 				
@@ -241,12 +262,12 @@ public class Runner extends Player {
 		}
 		else if (y != yTarget){
 			if (y <= yTarget) {
-				System.out.println("Moved Down One");
+				//System.out.println("Moved Down One");
 				tile = predictTileDanger(xTarget, yTarget-1, step+1, tile);
 				tile.setDanger(tile.getDanger() + totalYDanger);
 			}
 			else{
-				System.out.println("Moved Up One");
+				//System.out.println("Moved Up One");
 				tile = predictTileDanger(xTarget, yTarget+1, step+1, tile);
 				tile.setDanger(tile.getDanger() + totalYDanger);
 			}

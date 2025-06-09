@@ -1,10 +1,8 @@
-package robotSim;
+package robotSimCopy;
 
 import java.awt.*;
 import becker.robots.City;
 import becker.robots.Direction;
-import unit3.Account;
-
 import java.util.*;
 import java.util.*;
 public class Octopus extends Player {
@@ -27,15 +25,31 @@ public class Octopus extends Player {
 		this.setColor(new Color(255, 165, 0));
 		this.maximumEnergyLevel = energyLevel;
 		this.energyLevel = this.maximumEnergyLevel;
+		this.maxStepsPerMove = maxStepsPerMove;
+		super.setX(x);
+		super.setY(y);
+
 
 
 	}
 
 	public void move() {
-
+		
 		if (this.chasing) {
-			int stepsNum = this.gen.nextInt(maxStepsPerMove);
-			super.move(maxStepsPerMove);
+			int stepsNum = this.gen.nextInt(this.maxStepsPerMove-1)+1;
+			
+			//System.out.println("About to move " + stepsNum + "steps");
+			for (int i = 0; i < stepsNum; i++) {
+				if (this.frontIsClear()) {
+					super.move();
+					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
+					if (this.distanceCalc(this.targetX, this.targetY) == 1) {
+						this.tagAttempt();
+						System.out.println("Am tagging: " + this.tagging);
+					}
+					
+				}
+			}
 			if (stepsNum == maxStepsPerMove) {
 				this.energyLevel -= 2;
 			} else {
@@ -43,26 +57,35 @@ public class Octopus extends Player {
 			}
 
 		} else {
-			super.move();
+			if (this.frontIsClear()) {
+				super.move();
+			}
 		}
+		
 	}
 
 
 
 	public void takeTurn() {
-		if (this.sufficientEnergy() && this.resting != true) {
+		this.x =  getAvenue();
+		this.y = getStreet();
+		this.tagging = false;
+		//System.out.println("Current X" + this.x + " current Y" +this.y);
+		//System.out.println(this.chasing);
+
 			this.chase();
-		} else {
-			this.rest();
-		}
+			//System.out.println("Chasing");
+		
 
 	}
 
 	private void chase() {
 		this.lockOnTarget();
+		
+		//System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
+		//System.out.println("Current energy: " + this.getEnergyLevel());
 		this.advanceToTarget();
 		this.tagAttempt();
-		this.tagging = false;
 		this.rest();
 	}
 
@@ -88,38 +111,38 @@ public class Octopus extends Player {
 	}
 
 	private void advanceToTarget() {
-		if (this.targetX != x) {
-			if (this.targetX < x) {
+		if (this.targetX != this.x) {
+			//System.out.println("I am not at the target's x");
+			if (this.targetX < this.x) {
+				//System.out.println("I am to the east of the target's x");
 				this.faceWest();
-				for (int i = 0; i < (this.x-this.targetX); i++) {
-					this.move();
-				}
-			} else {
+				this.move();
+			} else if (this.targetX > this.x) {
+				//System.out.println("I am to the west of the target's x");
 				this.faceEast();
-				for (int i = 0; i < (this.targetX-this.x); i++) {
-					this.move();
-				}
+				this.move();
 			}
 
 		} else if (this.targetY != this.y) {
+			//System.out.println("I am not at the target's y");
 			if (this.targetY < y) {
 				this.faceNorth();
-				for (int i = 0; i < (this.y-this.targetY); i++) {
-					this.move();
-				}
+				this.move();
 			} else {
 				this.faceSouth();
-				for (int i = 0; i < (this.targetY-this.y); i++) {
-					this.move();
-				}
+				this.move();
 			}
 		}
 	}
 
 
 	private void lockOnTarget() {
-		if (this.chasing == false) {	
+		if (this.chasing == false) {
+			//System.out.println("Locking on");
 			this.sortByDistance(super.playerList);
+			for (int i = 0; i < super.playerList.length; i++) {
+				//System.out.println(super.playerList[i]);
+			}
 			this.chasing = true;
 			// first looking for medic
 			for (int i =0; i < playerList.length; i++) {
@@ -141,6 +164,16 @@ public class Octopus extends Player {
 
 			}
 		}
+		
+		if (this.chasing == true) {
+			for (int i = 0; i < super.playerList.length; i++) {
+				if (super.playerList[i].getName().equals(this.targetName)) {
+					//System.out.println("Updating target");
+					this.targetX = super.playerList[i].getX();
+					this.targetY = super.playerList[i].getY();
+				}
+			}
+		}
 	}
 
 	private void sortByDistance(playerRecord [] numbersArray) {
@@ -156,6 +189,10 @@ public class Octopus extends Player {
 
 	private double distanceCalc(playerRecord player) {
 		return Math.sqrt(Math.pow((player.getX() - this.x),2) + Math.pow((player.getY() - this.y),2));
+	}
+	
+	private double distanceCalc(int currentX, int currentY) {
+		return Math.sqrt(Math.pow((currentX - this.x),2) + Math.pow((currentY - this.y),2));
 	}
 	private static void swap(int pos1, int pos2, playerRecord swapArray[]) {
 		// saving the 2 numbers to temp variables
