@@ -160,7 +160,7 @@ public class Octopus extends Player {
 					this.targetName = super.playerList[i].getName();
 					break;
 				} else { // if no medic then find other players
-					for (int j =0; i < super.playerList.length; i++) {
+					for (int j =0; j < super.playerList.length; i++) {
 						System.out.println("Locking on to non medic");
 						if (super.playerList[j].getType() != 3) {
 							this.targetY = super.playerList[j].getY();
