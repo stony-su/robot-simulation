@@ -39,11 +39,11 @@ public class Runner extends Player {
 	public void switchModes(){
 		if (isAlgae) {
 			isAlgae = false;
-			super.setColor(Color.GREEN);
+			super.setColor(Color.BLUE);
 		}
 		else {
 			isAlgae = true;
-			super.setColor(Color.BLUE);
+			super.setColor(Color.GREEN);
 		}
 	}
 	
