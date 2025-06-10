@@ -1,4 +1,4 @@
-package robotSimCopy;
+package robotSim;
 
 public class playerRecord {
     private int enemyX;

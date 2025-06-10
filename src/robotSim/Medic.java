@@ -1,8 +1,11 @@
 package robotSim;
 
 import becker.robots.*;
+import robotSim.*;
+
 import java.util.*;
 
+// Medic class that heals other players and avoids the octopus
 public class Medic extends Player {
 	private Player[] playerRecord;
 	private Player octopus;
@@ -10,6 +13,7 @@ public class Medic extends Player {
 	private final int healAmount = 10;
 	private final double octopusAvoidance = 1;
 	private final int stepsPerMove;
+	private boolean movingRight = true; // starts going right
 
 	public Medic(String name, int energyLevel, int stepsPerMove, double dodgingAbility, City city, int y, int x,
 	             Direction direction, Player octopus) {
@@ -22,7 +26,6 @@ public class Medic extends Player {
 		this.playerRecord = arr;
 	}
 
-
 	@Override
 	public int getType() {
 		return 3;
@@ -31,8 +34,23 @@ public class Medic extends Player {
 	@Override
 	public void takeTurn() {
 		handleNearbyPlayers();
+
+		if (movingRight && onRightWall()) {
+			movingRight = false;
+		} else if (!movingRight && onLeftWall()) {
+			movingRight = true;
+		}
+
 		double[][] threatMap = buildDangerMap();
 		moveSafelyTowardGoal(threatMap);
+	}
+
+	private boolean onRightWall() {
+		return getAvenue() >= getCity().getNumAvenues() - 1;
+	}
+
+	private boolean onLeftWall() {
+		return getAvenue() <= 0;
 	}
 
 	private void handleNearbyPlayers() {
@@ -70,26 +88,39 @@ public class Medic extends Player {
 	}
 
 	private void moveSafelyTowardGoal(double[][] danger) {
-		int targetY = 0;
-		int bestX = getX();
-		int bestY = getY();
-		double minDanger = Double.MAX_VALUE;
+		List<int[]> options = new ArrayList<>();
+		int cx = getX();
+		int cy = getY();
 
 		for (int dx = -stepsPerMove; dx <= stepsPerMove; dx++) {
 			for (int dy = -stepsPerMove; dy <= stepsPerMove; dy++) {
-				int nx = getX() + dx;
-				int ny = getY() + dy;
-				if (ny < getY()) {
+				int nx = cx + dx;
+				int ny = cy + dy;
+
+				if ((movingRight && nx > cx) || (!movingRight && nx < cx)) {
 					double risk = danger[dy + stepsPerMove][dx + stepsPerMove];
-					if (risk < minDanger) {
-						minDanger = risk;
-						bestX = nx;
-						bestY = ny;
-					}
+					int scaledRisk = (risk == 0.0) ? 0 : (int) (risk * 10000);
+					options.add(new int[] { nx, ny, scaledRisk });
 				}
 			}
 		}
-		goTo(bestY, bestX);
+
+		for (int i = 0; i < options.size(); i++) {
+			int minIndex = i;
+			for (int j = i + 1; j < options.size(); j++) {
+				if (options.get(j)[2] < options.get(minIndex)[2]) {
+					minIndex = j;
+				}
+			}
+			int[] temp = options.get(i);
+			options.set(i, options.get(minIndex));
+			options.set(minIndex, temp);
+		}
+
+		if (!options.isEmpty()) {
+			int[] best = options.get(0);
+			goTo(best[1], best[0]); // [1]=street, [0]=avenue
+		}
 	}
 
 	private double calculateDistance(int x1, int y1, int x2, int y2) {
@@ -98,7 +129,6 @@ public class Medic extends Player {
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 
-	/** Go to a location by avenue then street */
 	private void goTo(int street, int avenue) {
 		goToAvenue(avenue);
 		goToStreet(street);
@@ -106,61 +136,45 @@ public class Medic extends Player {
 
 	private void goToAvenue(int avenue) {
 		if (getAvenue() > avenue) {
-			turnWest();
+			pointWest();
 			move(getAvenue() - avenue);
 		} else {
-			turnEast();
+			pointEast();
 			move(avenue - getAvenue());
 		}
 	}
 
 	private void goToStreet(int street) {
 		if (getStreet() > street) {
-			turnNorth();
+			pointNorth();
 			move(getStreet() - street);
 		} else {
-			turnSouth();
+			pointSouth();
 			move(street - getStreet());
 		}
 	}
 
-	private void turnNorth() {
-		if (this.getDirection() == Direction.SOUTH) {
-			this.turnAround();
-		} else if (this.getDirection() == Direction.WEST) {
-			this.turnRight();
-		} else if (this.getDirection() == Direction.EAST) {
-			this.turnLeft();
-		}
+	private void pointNorth() {
+		if (isFacingEast()) turnLeft();
+		else if (isFacingSouth()) { turnLeft(); turnLeft(); }
+		else if (isFacingWest()) turnRight();
 	}
 
-	private void turnSouth() {
-		if (this.getDirection() == Direction.NORTH) {
-			this.turnAround();
-		} else if (this.getDirection() == Direction.EAST) {
-			this.turnRight();
-		} else if (this.getDirection() == Direction.WEST) {
-			this.turnLeft();
-		}
+	private void pointSouth() {
+		if (isFacingEast()) turnRight();
+		else if (isFacingNorth()) { turnLeft(); turnLeft(); }
+		else if (isFacingWest()) turnLeft();
 	}
 
-	private void turnWest() {
-		if (this.getDirection() == Direction.NORTH) {
-			this.turnLeft();
-		} else if (this.getDirection() == Direction.EAST) {
-			this.turnAround();
-		} else if (this.getDirection() == Direction.SOUTH) {
-			this.turnRight();
-		}
+	private void pointWest() {
+		if (isFacingSouth()) turnRight();
+		else if (isFacingEast()) { turnLeft(); turnLeft(); }
+		else if (isFacingNorth()) turnLeft();
 	}
 
-	private void turnEast() {
-		if (this.getDirection() == Direction.SOUTH) {
-			this.turnLeft();
-		} else if (this.getDirection() == Direction.WEST) {
-			this.turnAround();
-		} else if (this.getDirection() == Direction.NORTH) {
-			this.turnRight();
-		}
+	private void pointEast() {
+		if (isFacingSouth()) turnLeft();
+		else if (isFacingWest()) { turnLeft(); turnLeft(); }
+		else if (isFacingNorth()) turnRight();
 	}
 }

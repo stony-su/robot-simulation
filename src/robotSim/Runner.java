@@ -1,4 +1,4 @@
-package robotSimCopy;
+package robotSim;
 import java.awt.Color;
 import java.math.*;
 import becker.robots.*;
