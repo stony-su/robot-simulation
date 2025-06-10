@@ -1,106 +1,208 @@
 package robotSim;
-import java.util.*;
+import java.awt.Color;
+import java.math.*;
 import becker.robots.*;
+import java.util.*;
 
 
-public class Application {
-	private final static int OCTO_NUM = 1;
-	private final static int PLAYER_NUM = 5;	
-	private final static int ENERGY_LIMIT = 10;
-	private final static int STEPS_LIMIT = 6;
-	private final static int DODGE_LIMIT = 7;
-	private final static int WALLS_WIDTH = 12;
-	private final static int WALLS_LENGTH = 24;
-	private final static int OCTOPUS_WAIT_MAX = 4;
-	private final static int OCTOPUS_WAIT_MIN = 1;
-	private static boolean allPlayersCaught = false;
-	private boolean tag = false;
-	
-	public static void main (String []args) {
-		City city = new City (12, 24);
-		createWalls(city);
-		Player [] playerArr = new Player [PLAYER_NUM + OCTO_NUM];
-		String[] names = {
-			    "Alex", "Jamie", "Taylor", "Jordan", "Morgan", "Casey", "Riley", "Drew", "Cameron", "Skyler",
-			    "Peyton", "Quinn", "Avery", "Rowan", "Reese", "Emerson", "Finley", "Dakota", "Harper", "Sage",
-			    "Logan", "Blake", "Elliot", "Hayden", "Parker", "Sawyer", "Tatum", "Charlie", "Remy", "Alexis",
-			    "Jesse", "Kai", "Spencer", "Shiloh", "Kendall", "Arden", "Lennon", "River", "Phoenix", "Marlow",
-			    "Lane", "Greer", "Wren", "Indigo", "Micah", "Bailey", "Rowe", "Ellis", "Oakley", "Emery"
-			};
-		
-		Random gen = new Random ();
-		
-		int energy = gen.nextInt(ENERGY_LIMIT-1)+1;
-		int steps = gen.nextInt(STEPS_LIMIT-1)+1;
-		double dodge = 0;//gen.nextDouble(DODGE_LIMIT-0.1)+0.1;
-		int height = gen.nextInt(11)+1;
-		Direction direction = Direction.EAST;
-		Player octopus = new Octopus (names[names.length-1], energy, 5, dodge, city, 6, 12, Direction.WEST);
-		playerArr[playerArr.length-1] = octopus;
-		
-		for (int i = 0; i < PLAYER_NUM; i++) {
-			energy = gen.nextInt(ENERGY_LIMIT-1)+1;
-			int maxSteps = gen.nextInt(STEPS_LIMIT-1)+1;
-			steps = gen.nextInt(STEPS_LIMIT/2-1)+1;
-			dodge = 0;//(Math.random(DODGE_LIMIT*10-1)+1)/10;
-			height = gen.nextInt(11)+1;
-			direction = Direction.EAST;
-			Player runner = new Runner (names[i], energy, maxSteps, dodge, city, height, 1, direction, steps, octopus);
-			playerArr[i] = runner;
-		}
-		
-		playerRecord [] runnerArr = new playerRecord[PLAYER_NUM];
-		for (int i = 0; i < PLAYER_NUM; i++) {
-			runnerArr[i] = new playerRecord (playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
-		}
-		
-		for (int i = 0; i < PLAYER_NUM; i++) {
-			playerArr[i].setPlayerRecord(runnerArr);
-		}
-		
-		octopus.setPlayerRecord(runnerArr);
-		playerRecord[] recordArr = runnerArr;
-		
-		//main game loop
-		while (!allPlayersCaught) {
-			for (int i = 0; i < playerArr.length; i++) {
-				
-				if (everyoneOnWall(playerArr)) {
-					callOctopus();
-				}
-				recordArr = updateRecords(playerArr);
-				playerArr[i].setPlayerRecord(recordArr);
-				
-				if (playerArr[i].getType() != 4 && !onWall(playerArr[i])) {
-					playerArr[i].takeTurn();
-				}
-				if (playerArr[i].getType() == 4) {
-					playerArr[i].takeTurn();
-			}
-				if (playerArr[i].getType() == 4) {
-					//System.out.println(((Octopus)playerArr[i]).getTargetX());
-					System.out.println("am tagging (app): "+ ((Octopus)playerArr[i]).getTagging());
-					if (((Octopus)playerArr[i]).getTagging() == true) {
-						System.out.println("Tagged target!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-						String name = ((Octopus)playerArr[i]).getTargetName();
-						triggerTag(name, playerArr);
-					}
-				}
-				updateStatus (playerArr);
-			}	
-		}
-	}
-	
-	private static void callOctopus() {
+public class Runner extends Player {
+	private int stepsPerMove;
+	private Player octopus;
+	private playerRecord[] runnerRecord;
+	private double runnerAvoidance = 0.00025;
+	private double octopusAvoidance = 0.009;
+	private double algaeAvoidance = 0.1;
+	private boolean isAlgae;
+	private boolean goingLeft = false;
+	private final int CITY_LENGTH = 24;
+	private final double TRAVEL_IMPORTANCE = 0.01;
+	private int energyCap;
+	private int energyHeld;
+	private int energyRecovery;
+	private int minStartle;
+	private static final int MIN_STARTLE_MAX = 10;
+	private static final int MIN_STARTLE_MIN = 3;
+
+	public Runner(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction, int stepsPerMove, Player octopus) {
+		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, 6, x, direction);
+		this.stepsPerMove = stepsPerMove;
+		this.octopus = octopus;
+		isAlgae = false;
 		Random gen = new Random();
-		int seconds = gen.nextInt(OCTOPUS_WAIT_MAX-OCTOPUS_WAIT_MIN)+OCTOPUS_WAIT_MIN;
-		try {
-			Thread.sleep(seconds*1000);
-		} catch (InterruptedException e) {}
+		this.minStartle = gen.nextInt(MIN_STARTLE_MAX-MIN_STARTLE_MIN)+MIN_STARTLE_MIN;
+		this.energyRecovery = stepsPerMove;
+		this.energyCap = energyLevel;
+		this.energyHeld = energyLevel;
+		super.setLabel(super.getName());
+	}
+		
+	public void switchModes(){
+		if (isAlgae) {
+			isAlgae = false;
+			super.setColor(Color.GREEN);
+		}
+		else {
+			isAlgae = true;
+			super.setColor(Color.BLUE);
+		}
 	}
 	
-	private static boolean onWall(Player player) {
-		if (((Runner) player).onRightWall() || ((Runner) player).onLeftWall()) {
+	public void takeTurn() {
+		super.setX(getAvenue());
+		super.setY(getStreet());
+		
+		if (!isAlgae) {
+			if (energyHeld < energyCap)
+				energyHeld = energyHeld + energyRecovery;
+			
+			double distanceFromOctopus = accessDistance(getAvenue(), getStreet(), octopus.getX(), octopus.getY());
+			if (distanceFromOctopus < minStartle && energyHeld > energyCap/3)
+				stepsPerMove = super.getMaxStepsPerMove();
+			else
+				stepsPerMove = energyRecovery;
+			
+			this.runnerRecord = super.getPlayerRecord();
+			optimalMove();
+			energyHeld = energyHeld - stepsPerMove;
+		}
+		else {
+			for (int i = 0; i < 4; i++) {
+				this.turnLeft();
+			}
+		}
+	}
+
+	private void optimalMove() {
+		int x = getAvenue();
+		int y = getStreet();
+		//this.printState();
+		int formulaLoops = 1 + 2*(stepsPerMove);
+		Location [] tiles = new Location [formulaLoops];
+		int xShift = 0;
+		int yShift = stepsPerMove;
+		
+		for (int i = 0; i < stepsPerMove*2; i = i+2) {
+			if (!goingLeft) {
+				tiles[i] = predictTileDanger(x+xShift,y+yShift, 0, new Location (x+xShift, y+yShift));
+				tiles[i+1] = predictTileDanger(x+xShift,y-yShift, 0, new Location (x+xShift, y-yShift));
+			}
+			else {
+				//System.out.println("going left");
+				tiles[i] = predictTileDanger(x-xShift,y+yShift, 0, new Location (x-xShift, y+yShift));
+				tiles[i+1] = predictTileDanger(x-xShift,y-yShift, 0, new Location (x-xShift, y-yShift));
+			}
+			xShift = xShift + 1;
+			yShift = yShift - 1;
+		}
+		if (!goingLeft) {
+			tiles[tiles.length-1] = predictTileDanger(x+stepsPerMove,y, 0, new Location (x+stepsPerMove, y));
+		}
+		else{
+			tiles[tiles.length-1] = predictTileDanger(x-stepsPerMove,y, 0, new Location (x-stepsPerMove, y));
+		}
+		
+		tiles = insertionSort(tiles);
+		//printTiles(tiles);
+		//int [][] path = tiles[tiles.length-1].getPath();
+		int [][] path = tiles[0].getPath();
+		
+		movePath(path);
+	}
+	
+	public void changeDirection() {
+		turnLeft();
+		turnLeft();
+		move();
+		goingLeft = !goingLeft;
+	}
+	
+	private void printTiles(Location[] tiles) {
+	    System.out.println("==== Tiles Info ====");
+	    for (int i = 0; i < tiles.length; i++) {
+	        if (tiles[i] == null) {
+	            System.out.println("Tile " + i + ": null");
+	            continue;
+	        }
+
+	        System.out.println("Tile " + i + ":");
+	        System.out.println("  Coordinates: (" + tiles[i].getX() + ", " + tiles[i].getY() + ")");
+	        System.out.println("  Danger Level: " + tiles[i].getDanger());
+
+	        int[][] path = tiles[i].getPath();
+	        System.out.print("  Path: ");
+	        if (path != null) {
+	            for (int j = 0; j < path.length; j++) {
+	                if (path[j][0] == 0 && path[j][1] == 0 && j != 0) break; // assume 0,0 is default filler
+	                System.out.print("-> (" + path[j][0] + ", " + path[j][1] + ") ");
+	            }
+	        } else {
+	            System.out.print("null");
+	        }
+	        System.out.println("\n");
+	    }
+	    System.out.println("=====================");
+	}
+
+
+	private void movePath(int[][] path) {
+		//System.out.println("path length:" + path.length);
+		for (int i = path.length; i > 0; i--) {
+			int x = path[i-1][0];
+			int y = path[i-1][1];
+			//System.out.println("Moving to:" + x + ", " + y);
+			moveTo(x,y);
+		}
+	}
+
+	private void moveTo(int x, int y) {
+	    while (getAvenue() > x && frontIsClear()) {
+	        pointWest();
+	        move();
+	    }
+
+	    while (getAvenue() < x && frontIsClear()) {
+	        pointEast();
+	        move();
+	    }
+
+	    while (getStreet() > y && frontIsClear()) {
+	        pointNorth();
+	        move();
+	    }
+
+	    while (getStreet() < y && frontIsClear()) {
+	        pointSouth();
+	        move();
+	    }
+	}
+
+	private Location[] insertionSort(Location[] tiles) {
+	    for (int i = 1; i < tiles.length; ++i) {
+	        Location key = tiles[i];
+	        int j = i - 1;
+
+	        while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
+	            tiles[j + 1] = tiles[j];
+	            j = j - 1;
+	        }
+	        tiles[j + 1] = key;
+	    }
+	    return tiles;
+	}
+	
+	public boolean onLeftWall() {
+		int x = getAvenue();
+		if (x == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	
+	public boolean onRightWall() {
+		int x = getAvenue();
+		if (x == 23) {
 			return true;
 		}
 		else {
@@ -108,63 +210,202 @@ public class Application {
 		}
 	}
 
-	private static boolean everyoneOnWall(Player[] playerArr) {
-		for (int i = 0; i < playerArr.length-1; i++) {
-			if (!onWall(playerArr[i])) {
-				return false;
+
+	private Location predictTileDanger(int xTarget, int yTarget, int step, Location tile) {
+		int x = getAvenue();
+		int y = getStreet();
+		//System.out.println("you are at:" + x + ", " + y);
+		//System.out.println("target is: " + xTarget + ", " + yTarget);
+		
+		if (x == xTarget && y == yTarget) {
+			//System.out.println("recursed back");
+			//System.out.println("==============================");
+			tile.setDanger(0);
+			return tile;
+		}
+		
+		if (step == 0) {
+			tile.setPath(new int [stepsPerMove][2]);
+			//tile.setPath(new int [20][2]);
+		}
+		
+		double totalXDanger = 0;
+		double totalYDanger = 0;
+		if (!goingLeft) {
+			totalXDanger = accessDangerXY(xTarget+1, yTarget);
+		}
+		else {
+			totalXDanger = accessDangerXY(xTarget-1, yTarget);
+		}
+		
+		if (y < yTarget) {
+			totalYDanger = 	accessDangerXY(xTarget, yTarget+1);
+
+		}
+		else {
+			totalYDanger = accessDangerXY(xTarget, yTarget-1);
+		}
+		
+		if (x != xTarget) {
+			
+				if (!goingLeft) {
+					//System.out.println("Moved back one");
+			        tile = predictTileDanger(xTarget - 1, yTarget, step+1, tile);
+			    } 
+				else {
+					//System.out.println("Moved foward one");
+			        tile = predictTileDanger(xTarget + 1, yTarget, step+1, tile);
+			    }
+				
+			    tile.setDanger(tile.getDanger() + totalXDanger);
+			
+		}
+		else if (y != yTarget){
+			if (y <= yTarget) {
+				//System.out.println("Moved Down One");
+				tile = predictTileDanger(xTarget, yTarget-1, step+1, tile);
+				tile.setDanger(tile.getDanger() + totalYDanger);
+			}
+			else{
+				//System.out.println("Moved Up One");
+				tile = predictTileDanger(xTarget, yTarget+1, step+1, tile);
+				tile.setDanger(tile.getDanger() + totalYDanger);
+			}
+		}
+
+		//loop from back!
+		int [][] optimalPath = tile.getPath();
+		optimalPath [step][0] = xTarget;
+		optimalPath [step][1] = yTarget;
+		tile.setPath(optimalPath);
+
+		return tile;
+	}
+
+	private double accessDangerXY(int targetX, int targetY) {
+		double danger = 1;
+		
+		if (targetX < -1 || targetX > 24 || targetY > 11 || targetY < 0)
+			return 1000000;
+		
+		double distanceFromRunners = 0;
+		for(int i = 0; i < this.runnerRecord.length-1; i++) {
+			if (runnerRecord[i].getType() == 3) {
+				distanceFromRunners = accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
+				danger = danger * (1 - algaeAvoidance * distanceFromRunners);
+			}
+			else {
+				distanceFromRunners = accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
+				danger = danger * (1 - runnerAvoidance * distanceFromRunners);
 			}
 		}
 		
-		for (int a = 0; a < playerArr.length-1; a++) {
-			((Runner)playerArr[a]).changeDirection();
+		if (!goingLeft) {
+			danger = danger * (1 - TRAVEL_IMPORTANCE * (targetX));
 		}
-		return true;
-	}
-
-	private static void createWalls(City city) {
-		Wall [] walls = new Wall[2*(WALLS_WIDTH+WALLS_LENGTH)];
-		for (int i = 0; i < WALLS_WIDTH; i++) {
-			walls[i] = new Wall (city, i, 0, Direction.WEST);
+		else {
+			danger = danger * (1 - TRAVEL_IMPORTANCE * (CITY_LENGTH - targetX));
 		}
 		
-		for (int a = 0; a < WALLS_WIDTH; a++) {
-			walls[a+WALLS_WIDTH] = new Wall (city, a, WALLS_LENGTH-1, Direction.EAST);
-		}
-		
-		for (int b = 0; b < WALLS_LENGTH; b++) {
-			walls[b+WALLS_WIDTH*2] = new Wall (city, 0, b, Direction.NORTH);
-		}
-		
-		for (int c = 0; c < WALLS_LENGTH; c++) {
-			walls[c+WALLS_WIDTH*2+WALLS_LENGTH] = new Wall (city, WALLS_WIDTH-1, c, Direction.SOUTH);
-		}
-	}
-
-	private static playerRecord[] updateRecords(Player[] playerArr) {
-		playerRecord [] runnerArr = new playerRecord[PLAYER_NUM];
-		for (int i = 0; i < runnerArr.length; i++) {
-			runnerArr[i] = new playerRecord (playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
-		}
-		return runnerArr;
-	}
-
-	private static void updateStatus (Player[] arr) {
-		for (int i = 0; i<arr.length-1; i++) {
-			if (arr[i].getType() != 3)
-				return;
-		}
-		allPlayersCaught = true;
+		double distanceFromOctopus = accessDistance(targetX, targetY, octopus.getX(), octopus.getY());
+		danger = danger * (1 - distanceFromOctopus*octopusAvoidance) ;
+		//System.out.println("I am " + distanceFromOctopus + "m away from the octopus");
+		//System.out.println("Total danger at (" + targetX + "," + targetY + ") = " + danger);
+		return danger;
 	}
 	
-	private static void triggerTag(String name, Player[] arr) {
-		for (int i = 0; i < arr.length; i++) {
-			if (arr[i].getName().equals(name)){
-				
-				double dodge = arr[i].getDodgingAbility();
-				if (Math.random() > dodge) {
-					((Runner)arr[i]).switchModes();
-				}
-			}
+	private double accessDistance(int targetX, int targetY, int itemX, int itemY) {
+		double xDiff = Math.abs(targetX - itemX);
+		double yDiff = Math.abs(targetY - itemY);
+		return Math.sqrt(xDiff*xDiff + yDiff*yDiff);
+	}
+
+	public int getType() {
+		if (isAlgae)
+			return 3;
+		else
+			return 2;
+	}
+	
+	/**
+	 * points the robot in the North direction
+	 * @post robot is facing north
+	 */
+	private void pointNorth() {
+		//if facing east/south/west, turn as needed
+		if(isFacingEast()) {
+			turnLeft();
+		}
+		else if(isFacingSouth()) {
+			for (int i = 0; i < 2; i++)
+				turnLeft();
+		}
+		else if(isFacingWest()) {
+			turnRight();
 		}
 	}
+	
+	/**
+	 * points the robot in the south direction
+	 * @post robot is facing south
+	 */
+	private void pointSouth() {
+		//if facing north/east/west, turn as needed
+		if(isFacingEast()) {
+			turnRight();
+		}
+		else if(isFacingNorth()) {
+			for (int i = 0; i < 2; i++)
+				turnLeft();
+		}
+		else if(isFacingWest()) {
+			turnLeft();
+		}
+	}
+	
+	/**
+	 * points the robot in the west direction
+	 * @post robot is facing west
+	 */
+	private void pointWest() {
+		//if facing north/east/south, turn as needed
+		if(isFacingSouth()) {
+			turnRight();
+		}
+		else if(isFacingEast()) {
+			for (int i = 0; i < 2; i++)
+				turnLeft();
+		}
+		else if(isFacingNorth()) {
+			turnLeft();
+		}
+	}
+	
+	/**
+	 * points the robot in the east direction
+	 * @post robot is facing east
+	 */
+	private void pointEast() {
+		//if facing north/south/west, turn as needed
+		if(isFacingSouth()) {
+			turnLeft();
+		}
+		else if(isFacingWest()) {
+			for (int i = 0; i < 2; i++)
+				turnLeft();
+		}
+		else if(isFacingNorth()) {
+			turnRight();
+		}
+	}
+	public void printState() {
+		System.out.println("------------------------------------");
+		System.out.println("- Runner State                     -");
+		System.out.println("- Steps Per Move: " + stepsPerMove + "            -");
+		System.out.println("- Current Pos: (" + getAvenue() + "," + getStreet() + ")        -");
+		System.out.println("- Going Left: " + goingLeft + "                  -");
+		System.out.println("- Algae Mode: " + isAlgae + "                  -");
+		System.out.println("------------------------------------");
+	}
+
 }
