@@ -85,7 +85,7 @@ public class Octopus extends Player {
 		//System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
 		//System.out.println("Current energy: " + this.getEnergyLevel());
 		this.advanceToTarget();
-		this.tagAttempt();
+		//this.tagAttempt();
 		this.rest();
 	}
 
