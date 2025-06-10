@@ -43,10 +43,14 @@ public class Octopus extends Player {
 				if (this.frontIsClear()) {
 					super.move();
 					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
-					if (this.distanceCalc(this.targetX, this.targetY) == 1) {
+					if (this.distanceCalc(this.targetX, this.targetY) <= Math.sqrt(2)) {
 						this.tagAttempt();
 						System.out.println("Am tagging: " + this.tagging);
+						System.out.println("resting");
+						this.chasing = false;
+						
 					}
+					
 					
 				}
 			}
@@ -72,8 +76,9 @@ public class Octopus extends Player {
 		this.tagging = false;
 		//System.out.println("Current X" + this.x + " current Y" +this.y);
 		//System.out.println(this.chasing);
-
+		if (!this.resting) {
 			this.chase();
+		}
 			//System.out.println("Chasing");
 		
 
@@ -82,7 +87,7 @@ public class Octopus extends Player {
 	private void chase() {
 		this.lockOnTarget();
 		
-		//System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
+		System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
 		//System.out.println("Current energy: " + this.getEnergyLevel());
 		this.advanceToTarget();
 		//this.tagAttempt();
@@ -105,6 +110,8 @@ public class Octopus extends Player {
 	private void tagAttempt() {
 		this.tagging = true;
 	}
+	
+	
 
 	public boolean getTagging() {
 		return this.tagging;
@@ -137,8 +144,8 @@ public class Octopus extends Player {
 
 
 	private void lockOnTarget() {
-		if (this.chasing == false) {
-			//System.out.println("Locking on");
+		
+			System.out.println("Locking on");
 			this.sortByDistance(super.playerList);
 			for (int i = 0; i < super.playerList.length; i++) {
 				//System.out.println(super.playerList[i]);
@@ -147,23 +154,27 @@ public class Octopus extends Player {
 			// first looking for medic
 			for (int i =0; i < playerList.length; i++) {
 				if (super.playerList[i].getType() == 1) {
+					System.out.println("Locking on to medic");
 					this.targetY = super.playerList[i].getY();
 					this.targetX = super.playerList[i].getX();
 					this.targetName = super.playerList[i].getName();
 					break;
 				} else { // if no medic then find other players
 					for (int j =0; i < super.playerList.length; i++) {
-						if (super.playerList[j].getType() < 3) {
+						System.out.println("Locking on to non medic");
+						if (super.playerList[j].getType() != 3) {
 							this.targetY = super.playerList[j].getY();
 							this.targetX = super.playerList[j].getX();
 							this.targetName = super.playerList[j].getName();
+							System.out.println("Target type: " + super.playerList[i].getType());
 						}
 					}
 
 				}
+				System.out.println("Target type: " + super.playerList[i-1].getType());
 
 			}
-		}
+		
 		
 		if (this.chasing == true) {
 			for (int i = 0; i < super.playerList.length; i++) {
