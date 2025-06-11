@@ -6,13 +6,16 @@ public class playerRecord {
     private int dodgeAbility;
     private String name;
     private int type;
-
+    private double catchIndex;
+  
     public playerRecord(int enemyX, int enemyY, String name, int type, int dodgeAbility) {
         this.enemyX = enemyX;
         this.enemyY = enemyY;
         this.name = name;
         this.type = type;
         this.dodgeAbility = dodgeAbility;
+        this.catchIndex = 0;
+       
     }
     
     public String toString() {
@@ -37,10 +40,24 @@ public class playerRecord {
     public int getType() {
         return type;
     }
-
+    
+    public void updateCatchIndex(double distance) {
+    	this.catchIndex += distance;
+    	this.catchIndex += this.type;
+    	this.catchIndex += this.dodgeAbility;
+    }
+    
+    public double getCatchIndex() {
+    	return this.catchIndex;
+    }
     public void updateRecord(int enemyX, int enemyY, int dodgeAbility) {
         this.enemyX = enemyX;
         this.enemyY = enemyY;
         this.dodgeAbility = dodgeAbility;
     }
+
+	public void updateDodge(int i) {
+		this.dodgeAbility = i;
+		
+	}
 }

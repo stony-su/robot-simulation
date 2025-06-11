@@ -17,6 +17,7 @@ public class Octopus extends Player {
 	private int targetX, targetY;
 	private double targetDistance;
 	private String targetName;
+	  private int wall1X, wall2X;
 
 
 
@@ -28,71 +29,110 @@ public class Octopus extends Player {
 		this.maxStepsPerMove = maxStepsPerMove;
 		super.setX(x);
 		super.setY(y);
+		 wall1X = 1;
+	        wall2X = 22;
 
 
 
 	}
 
 	public void move() {
-		
+
 		if (this.chasing) {
-			int stepsNum = this.gen.nextInt(this.maxStepsPerMove-1)+1;
-			
+			//int stepsNum = this.gen.nextInt(this.maxStepsPerMove-1)+1;
+			int stepsNum = 1;
 			//System.out.println("About to move " + stepsNum + "steps");
 			for (int i = 0; i < stepsNum; i++) {
-				if (this.frontIsClear()) {
+				if (this.frontIsClear() && (stepsNum + this.x) != wall1X) {
 					super.move();
-					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
-					if (this.distanceCalc(this.targetX, this.targetY) == 1) {
-						this.tagAttempt();
-						System.out.println("Am tagging: " + this.tagging);
+					this.x = getAvenue();
+					this.y = getStreet();
+					for (int j = 0; j < super.playerList.length; j++) {
+						if (super.playerList[i].getX()== this.x && this.y == super.playerList[i].getY()) {
+							this.tagAttempt();
+
+							break;
+						}
+						System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
 					}
-					
+
+					if (this.targetX == this.x && this.targetY == this.y) {
+						this.tagAttempt();
+						for (int j = 0; j < super.playerList.length; j++) {
+							if (super.playerList[j].getName().equals(this.targetName)) {
+								if (super.playerList[j].getType() == 3) {
+									super.playerList[j].updateDodge(super.playerList[j].getDodge() -1);
+								} else {
+									super.playerList[j].updateDodge(super.playerList[j].getDodge() +1);
+								}
+								break;
+							}
+							System.out.println("Am tagging: " + this.tagging);
+							System.out.println("resting");
+							this.chasing = false;
+
+						}
+
+
+					}
+				}
+				if (stepsNum == maxStepsPerMove) {
+					this.energyLevel -= 2;
+				} else {
+					this.energyLevel -= 1;
 				}
 			}
-			if (stepsNum == maxStepsPerMove) {
-				this.energyLevel -= 2;
-			} else {
-				this.energyLevel -= 1;
-			}
-
 		} else {
 			if (this.frontIsClear()) {
 				super.move();
 			}
 		}
-		
+
 	}
 
 
 
 	public void takeTurn() {
-		this.x =  getAvenue();
+		this.x = getAvenue();
 		this.y = getStreet();
+
 		this.tagging = false;
 		//System.out.println("Current X" + this.x + " current Y" +this.y);
 		//System.out.println(this.chasing);
-
+		if (!this.resting) {
 			this.chase();
-			//System.out.println("Chasing");
-		
+		}
+		this.x = getAvenue();
+		this.y = getStreet();
+		if (this.targetX == this.x && this.targetY == this.y) {
+			this.tagAttempt();
+		}
+		//System.out.println("Chasing");
+
 
 	}
 
 	private void chase() {
 		this.lockOnTarget();
-		
-		//System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
+
+		System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
+		for (int i = 0; i < super.playerList.length; i++) {
+			if (super.playerList[i].getName().equals(this.targetName)) {
+				System.out.println("Target type" + super.playerList[i].getType());
+			}
+
+
+		}
+		System.out.format("My is at X %d, Y %d \n", this.x, this.y);
 		//System.out.println("Current energy: " + this.getEnergyLevel());
 		this.advanceToTarget();
 		//this.tagAttempt();
-		this.rest();
 	}
 
 	public String getTargetName() {
 		return this.targetName;
 	}
-	
+
 	public boolean getChasing() {
 		return this.chasing; 
 	}
@@ -106,6 +146,8 @@ public class Octopus extends Player {
 		this.tagging = true;
 	}
 
+
+
 	public boolean getTagging() {
 		return this.tagging;
 	}
@@ -116,55 +158,85 @@ public class Octopus extends Player {
 			if (this.targetX < this.x) {
 				//System.out.println("I am to the east of the target's x");
 				this.faceWest();
-				this.move();
+				this.x = getAvenue();
+				this.y = getStreet();
+				for (int i =0; i < (this.x - this.targetX)+(this.gen.nextInt(5-1)+1); i++) {
+					if (this.targetX == this.x) {
+						break;
+					}
+					System.out.println(this.x - this.targetX);
+					this.move();
+				}
 			} else if (this.targetX > this.x) {
 				//System.out.println("I am to the west of the target's x");
 				this.faceEast();
-				this.move();
+				this.x = getAvenue();
+				this.y = getStreet();
+				for (int i =0; i < (this.targetX - this.x)+(this.gen.nextInt(5-1)+1); i++) {
+					if (this.targetX == this.x) {
+						break;
+					}
+					System.out.println(this.targetX - this.x);
+					this.move();
+				}
 			}
+
 
 		} else if (this.targetY != this.y) {
 			//System.out.println("I am not at the target's y");
 			if (this.targetY < y) {
 				this.faceNorth();
-				this.move();
+				this.x = getAvenue();
+				this.y = getStreet();
+				for (int i =0; i < (this.y - this.targetY)+(this.gen.nextInt(5-1)+1); i++) {
+					if (this.targetY == this.y) {
+						break;
+					}
+					System.out.println(this.x - this.targetX);
+					this.move();
+				}
+
 			} else {
 				this.faceSouth();
-				this.move();
-			}
-		}
-	}
 
-
-	private void lockOnTarget() {
-		if (this.chasing == false) {
-			//System.out.println("Locking on");
-			this.sortByDistance(super.playerList);
-			for (int i = 0; i < super.playerList.length; i++) {
-				//System.out.println(super.playerList[i]);
-			}
-			this.chasing = true;
-			// first looking for medic
-			for (int i =0; i < playerList.length; i++) {
-				if (super.playerList[i].getType() == 1) {
-					this.targetY = super.playerList[i].getY();
-					this.targetX = super.playerList[i].getX();
-					this.targetName = super.playerList[i].getName();
-					break;
-				} else { // if no medic then find other players
-					for (int j =0; i < super.playerList.length; i++) {
-						if (super.playerList[j].getType() < 3) {
-							this.targetY = super.playerList[j].getY();
-							this.targetX = super.playerList[j].getX();
-							this.targetName = super.playerList[j].getName();
-						}
+				for (int i =0; i < (this.targetY - this.y)+(this.gen.nextInt(5-1)+1); i++) {
+					if (this.targetY == this.y) {
+						break;
 					}
-
+					System.out.println(this.targetY- this.y);
+					this.move();
 				}
 
 			}
 		}
-		
+
+
+
+	}
+
+
+	private void lockOnTarget() {
+
+		System.out.println("Locking on");
+		if (chasing == false) {
+			for (int i = 0; i < super.playerList.length; i++) {
+				super.playerList[i].updateCatchIndex(distanceCalc(super.playerList[i]));
+			}
+			this.sortByCatchability(super.playerList);
+			this.chasing = true;
+			// first looking for medic
+			for (int i = 0; i < super.playerList.length; i++) {
+				if (super.playerList[i].getType() != 3) {
+					this.targetName = super.playerList[i].getName();
+					this.targetX = super.playerList[i].getX();
+					this.targetY = super.playerList[i].getY();
+					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
+					System.out.println(targetName);
+
+				}
+			}
+		}
+
 		if (this.chasing == true) {
 			for (int i = 0; i < super.playerList.length; i++) {
 				if (super.playerList[i].getName().equals(this.targetName)) {
@@ -172,11 +244,15 @@ public class Octopus extends Player {
 					this.targetX = super.playerList[i].getX();
 					this.targetY = super.playerList[i].getY();
 				}
+
+
 			}
 		}
 	}
 
-	private void sortByDistance(playerRecord [] numbersArray) {
+
+
+	private void sortByCatchability(playerRecord [] numbersArray) {
 		final int ARRAYLENGTH = numbersArray.length;
 		for (int i = 0; i < ARRAYLENGTH; i++) {
 			for (int j = i; j > 0; j--) {
@@ -190,7 +266,7 @@ public class Octopus extends Player {
 	private double distanceCalc(playerRecord player) {
 		return Math.sqrt(Math.pow((player.getX() - this.x),2) + Math.pow((player.getY() - this.y),2));
 	}
-	
+
 	private double distanceCalc(int currentX, int currentY) {
 		return Math.sqrt(Math.pow((currentX - this.x),2) + Math.pow((currentY - this.y),2));
 	}
@@ -281,7 +357,7 @@ public class Octopus extends Player {
 		}
 	}
 
-	
+
 
 
 
