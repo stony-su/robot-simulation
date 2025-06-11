@@ -8,6 +8,7 @@ public class Medic extends Player {
 	private Player[] playerRecord;
 	private Player octopus;
 	private boolean goingLeft = false;
+	private boolean skipNextTurn = false;
 
 	// Constants
 	private final int INJURED_THRESHOLD = 50;
@@ -52,6 +53,12 @@ public class Medic extends Player {
 		super.setX(getAvenue());
 		super.setY(getStreet());
 
+		if (skipNextTurn == true) {
+			skipNextTurn = false;
+			System.out.println(getName() + " is recovering and skips this turn.");
+			return;
+		}
+	    
 		handleNearbyPlayers();
 
 		if (onRightWall()) {
@@ -62,6 +69,7 @@ public class Medic extends Player {
 
 		optimalMove();
 	}
+
 
 	private void handleNearbyPlayers() {
 		Random rand = new Random();
@@ -250,11 +258,15 @@ public class Medic extends Player {
 		return danger;
 	}
 
-	private double calculateDistance(int x1, int y1, int x2, int y2) {
-		double dx = Math.abs(x1 - x2);
-		double dy = Math.abs(y1 - y2);
-		double distance = Math.sqrt(dx * dx + dy * dy);
-		return distance;
+	public void tagAttempt() {
+		System.out.println(getName() + " was tagged! Spinning and skipping next turn.");
+		spinInPlace();
+		skipNextTurn = true;
+	}
+
+	private void spinInPlace() {
+		turnAround();
+		turnAround();
 	}
 
 	private void pointNorth() {
