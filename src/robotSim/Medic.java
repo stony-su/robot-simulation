@@ -1,25 +1,41 @@
 package robotSim;
 
+import java.awt.Color;
 import becker.robots.*;
-import robotSim.*;
-
 import java.util.*;
 
-// Medic class that heals other players and avoids the octopus
 public class Medic extends Player {
 	private Player[] playerRecord;
 	private Player octopus;
-	private final int healRange = 2;
-	private final int healAmount = 10;
-	private final double octopusAvoidance = 1;
-	private final int stepsPerMove;
-	private boolean movingRight = true; // starts going right
+	private boolean goingLeft = false;
 
-	public Medic(String name, int energyLevel, int stepsPerMove, double dodgingAbility, City city, int y, int x,
-	             Direction direction, Player octopus) {
-		super(name, energyLevel, stepsPerMove, dodgingAbility, city, y, x, direction);
+	// Constants
+	private final int INJURED_THRESHOLD = 50;
+	private final int MAX_ENERGY = 100;
+	private final int MIN_REVIVE_ENERGY = 5;
+	private final int MAX_REVIVE_ENERGY = 10;
+	private final int MIN_HEAL_AMOUNT = 1;
+	private final int MAX_HEAL_AMOUNT = 5;
+	private final int CITY_LENGTH = 24;
+	private final int LEFT_WALL = 0;
+	private final int RIGHT_WALL = 23;
+	private final int MAX_STREET = 11;
+	private final int MIN_STREET = 0;
+	private final int MAX_AVENUE = 24;
+	private final int MIN_AVENUE = -1;
+	private final double OCTOPUS_AVOIDANCE = 0.009;
+	private final double TRAVEL_IMPORTANCE = 0.01;
+	private final double OUT_OF_BOUNDS_DANGER = 1000000.0;
+
+	private final int stepsPerMove;
+
+	public Medic(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x,
+			Direction direction, int stepsPerMove, Player octopus) {
+		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
 		this.stepsPerMove = stepsPerMove;
 		this.octopus = octopus;
+		super.setLabel(super.getName());
+		super.setColor(Color.BLUE);
 	}
 
 	public void setPlayerRecord(Player[] arr) {
@@ -28,42 +44,49 @@ public class Medic extends Player {
 
 	@Override
 	public int getType() {
-		return 3;
+		return 1;
 	}
 
 	@Override
 	public void takeTurn() {
+		super.setX(getAvenue());
+		super.setY(getStreet());
+
 		handleNearbyPlayers();
 
-		if (movingRight && onRightWall()) {
-			movingRight = false;
-		} else if (!movingRight && onLeftWall()) {
-			movingRight = true;
+		if (onRightWall()) {
+			goingLeft = true;
+		} else if (onLeftWall()) {
+			goingLeft = false;
 		}
 
-		double[][] threatMap = buildDangerMap();
-		moveSafelyTowardGoal(threatMap);
-	}
-
-	private boolean onRightWall() {
-		return getAvenue() >= getCity().getNumAvenues() - 1;
-	}
-
-	private boolean onLeftWall() {
-		return getAvenue() <= 0;
+		optimalMove();
 	}
 
 	private void handleNearbyPlayers() {
-		for (Player p : playerRecord) {
-			if (p == this) continue;
-			if (calculateDistance(this.getX(), this.getY(), p.getX(), p.getY()) <= healRange) {
+		Random rand = new Random();
+		for (int i = 0; i < playerRecord.length; i++) {
+			Player p = playerRecord[i];
+			if (p == this) {
+				continue;
+			}
+
+			if (getX() == p.getX() && getY() == p.getY()) {
 				if (p.getEnergyLevel() <= 0) {
-					p.switchModes();
-					int newEnergy = new Random().nextInt(6) + 5; // 5–10
+					if (p instanceof Runner) {
+						((Runner) p).switchModes();
+					}
+					int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1);
+					newEnergy = newEnergy + MIN_REVIVE_ENERGY;
 					p.setEnergyLevel(newEnergy);
 					System.out.println(getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
-				} else if (p.getEnergyLevel() < 50) {
-					int boosted = p.getEnergyLevel() + healAmount;
+				} else if (p.getEnergyLevel() < INJURED_THRESHOLD) {
+					int heal = rand.nextInt(MAX_HEAL_AMOUNT - MIN_HEAL_AMOUNT + 1);
+					heal = heal + MIN_HEAL_AMOUNT;
+					int boosted = p.getEnergyLevel() + heal;
+					if (boosted > MAX_ENERGY) {
+						boosted = MAX_ENERGY;
+					}
 					p.setEnergyLevel(boosted);
 					System.out.println(getName() + " healed " + p.getName() + " to " + boosted + " energy.");
 				}
@@ -71,62 +94,52 @@ public class Medic extends Player {
 		}
 	}
 
-	private double[][] buildDangerMap() {
-		int size = 2 * stepsPerMove + 1;
-		double[][] map = new double[size][size];
-		int cx = getX(), cy = getY();
+	private void optimalMove() {
+		int totalTiles = 1 + 2 * stepsPerMove;
+		Location[] tiles = new Location[totalTiles];
+		int xShift = 0;
+		int yShift = stepsPerMove;
+		int x = getAvenue();
+		int y = getStreet();
 
-		for (int dx = -stepsPerMove; dx <= stepsPerMove; dx++) {
-			for (int dy = -stepsPerMove; dy <= stepsPerMove; dy++) {
-				int tx = cx + dx;
-				int ty = cy + dy;
-				double danger = calculateDistance(tx, ty, octopus.getX(), octopus.getY()) * octopusAvoidance;
-				map[dy + stepsPerMove][dx + stepsPerMove] = danger;
+		for (int i = 0; i < stepsPerMove * 2; i = i + 2) {
+			if (goingLeft == false) {
+				tiles[i] = predictTileDanger(x + xShift, y + yShift, 0, new Location(x + xShift, y + yShift));
+				tiles[i + 1] = predictTileDanger(x + xShift, y - yShift, 0, new Location(x + xShift, y - yShift));
+			} else {
+				tiles[i] = predictTileDanger(x - xShift, y + yShift, 0, new Location(x - xShift, y + yShift));
+				tiles[i + 1] = predictTileDanger(x - xShift, y - yShift, 0, new Location(x - xShift, y - yShift));
 			}
+			xShift = xShift + 1;
+			yShift = yShift - 1;
 		}
-		return map;
+
+		if (goingLeft == true) {
+			tiles[totalTiles - 1] = predictTileDanger(x - stepsPerMove, y, 0, new Location(x - stepsPerMove, y));
+		} else {
+			tiles[totalTiles - 1] = predictTileDanger(x + stepsPerMove, y, 0, new Location(x + stepsPerMove, y));
+		}
+
+		for (int i = 1; i < tiles.length; i++) {
+			Location key = tiles[i];
+			int j = i - 1;
+			while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
+				tiles[j + 1] = tiles[j];
+				j = j - 1;
+			}
+			tiles[j + 1] = key;
+		}
+
+		int[][] path = tiles[0].getPath();
+		movePath(path);
 	}
 
-	private void moveSafelyTowardGoal(double[][] danger) {
-		List<int[]> options = new ArrayList<>();
-		int cx = getX();
-		int cy = getY();
-
-		for (int dx = -stepsPerMove; dx <= stepsPerMove; dx++) {
-			for (int dy = -stepsPerMove; dy <= stepsPerMove; dy++) {
-				int nx = cx + dx;
-				int ny = cy + dy;
-
-				if ((movingRight && nx > cx) || (!movingRight && nx < cx)) {
-					double risk = danger[dy + stepsPerMove][dx + stepsPerMove];
-					int scaledRisk = (risk == 0.0) ? 0 : (int) (risk * 10000);
-					options.add(new int[] { nx, ny, scaledRisk });
-				}
-			}
+	private void movePath(int[][] path) {
+		for (int i = path.length; i > 0; i = i - 1) {
+			int street = path[i - 1][0];
+			int avenue = path[i - 1][1];
+			goTo(street, avenue);
 		}
-
-		for (int i = 0; i < options.size(); i++) {
-			int minIndex = i;
-			for (int j = i + 1; j < options.size(); j++) {
-				if (options.get(j)[2] < options.get(minIndex)[2]) {
-					minIndex = j;
-				}
-			}
-			int[] temp = options.get(i);
-			options.set(i, options.get(minIndex));
-			options.set(minIndex, temp);
-		}
-
-		if (!options.isEmpty()) {
-			int[] best = options.get(0);
-			goTo(best[1], best[0]); // [1]=street, [0]=avenue
-		}
-	}
-
-	private double calculateDistance(int x1, int y1, int x2, int y2) {
-		double dx = Math.abs(x1 - x2);
-		double dy = Math.abs(y1 - y2);
-		return Math.sqrt(dx * dx + dy * dy);
 	}
 
 	private void goTo(int street, int avenue) {
@@ -138,7 +151,7 @@ public class Medic extends Player {
 		if (getAvenue() > avenue) {
 			pointWest();
 			move(getAvenue() - avenue);
-		} else {
+		} else if (getAvenue() < avenue) {
 			pointEast();
 			move(avenue - getAvenue());
 		}
@@ -148,33 +161,139 @@ public class Medic extends Player {
 		if (getStreet() > street) {
 			pointNorth();
 			move(getStreet() - street);
-		} else {
+		} else if (getStreet() < street) {
 			pointSouth();
 			move(street - getStreet());
 		}
 	}
 
+	private boolean onLeftWall() {
+		if (getAvenue() == LEFT_WALL) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private boolean onRightWall() {
+		if (getAvenue() == RIGHT_WALL) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private Location predictTileDanger(int xTarget, int yTarget, int step, Location tile) {
+		int x = getAvenue();
+		int y = getStreet();
+
+		if (x == xTarget && y == yTarget) {
+			tile.setDanger(0);
+			return tile;
+		}
+
+		if (step == 0) {
+			tile.setPath(new int[stepsPerMove][2]);
+		}
+
+		double totalXDanger;
+		if (goingLeft == true) {
+			totalXDanger = accessDangerXY(xTarget - 1, yTarget);
+		} else {
+			totalXDanger = accessDangerXY(xTarget + 1, yTarget);
+		}
+
+		double totalYDanger;
+		if (y < yTarget) {
+			totalYDanger = accessDangerXY(xTarget, yTarget + 1);
+		} else {
+			totalYDanger = accessDangerXY(xTarget, yTarget - 1);
+		}
+
+		if (x != xTarget) {
+			if (goingLeft == true) {
+				tile = predictTileDanger(xTarget + 1, yTarget, step + 1, tile);
+			} else {
+				tile = predictTileDanger(xTarget - 1, yTarget, step + 1, tile);
+			}
+			tile.setDanger(tile.getDanger() + totalXDanger);
+		} else if (y != yTarget) {
+			if (y <= yTarget) {
+				tile = predictTileDanger(xTarget, yTarget - 1, step + 1, tile);
+			} else {
+				tile = predictTileDanger(xTarget, yTarget + 1, step + 1, tile);
+			}
+			tile.setDanger(tile.getDanger() + totalYDanger);
+		}
+
+		tile.getPath()[step][0] = xTarget;
+		tile.getPath()[step][1] = yTarget;
+		return tile;
+	}
+
+	private double accessDangerXY(int tx, int ty) {
+		if (tx < MIN_AVENUE || tx > MAX_AVENUE || ty < MIN_STREET || ty > MAX_STREET) {
+			return OUT_OF_BOUNDS_DANGER;
+		}
+
+		double dx = Math.abs(tx - octopus.getX());
+		double dy = Math.abs(ty - octopus.getY());
+		double distance = Math.sqrt(dx * dx + dy * dy);
+		double danger = 1 - distance * OCTOPUS_AVOIDANCE;
+
+		if (goingLeft == true) {
+			danger = danger * (1 - TRAVEL_IMPORTANCE * (CITY_LENGTH - tx));
+		} else {
+			danger = danger * (1 - TRAVEL_IMPORTANCE * tx);
+		}
+
+		return danger;
+	}
+
+	private double calculateDistance(int x1, int y1, int x2, int y2) {
+		double dx = Math.abs(x1 - x2);
+		double dy = Math.abs(y1 - y2);
+		double distance = Math.sqrt(dx * dx + dy * dy);
+		return distance;
+	}
+
 	private void pointNorth() {
-		if (isFacingEast()) turnLeft();
-		else if (isFacingSouth()) { turnLeft(); turnLeft(); }
-		else if (isFacingWest()) turnRight();
+		if (isFacingEast()) {
+			turnLeft();
+		} else if (isFacingSouth()) {
+			turnAround();
+		} else if (isFacingWest()) {
+			turnRight();
+		}
 	}
 
 	private void pointSouth() {
-		if (isFacingEast()) turnRight();
-		else if (isFacingNorth()) { turnLeft(); turnLeft(); }
-		else if (isFacingWest()) turnLeft();
+		if (isFacingEast()) {
+			turnRight();
+		} else if (isFacingNorth()) {
+			turnAround();
+		} else if (isFacingWest()) {
+			turnLeft();
+		}
 	}
 
 	private void pointWest() {
-		if (isFacingSouth()) turnRight();
-		else if (isFacingEast()) { turnLeft(); turnLeft(); }
-		else if (isFacingNorth()) turnLeft();
+		if (isFacingSouth()) {
+			turnRight();
+		} else if (isFacingEast()) {
+			turnAround();
+		} else if (isFacingNorth()) {
+			turnLeft();
+		}
 	}
 
 	private void pointEast() {
-		if (isFacingSouth()) turnLeft();
-		else if (isFacingWest()) { turnLeft(); turnLeft(); }
-		else if (isFacingNorth()) turnRight();
+		if (isFacingSouth()) {
+			turnLeft();
+		} else if (isFacingWest()) {
+			turnAround();
+		} else if (isFacingNorth()) {
+			turnRight();
+		}
 	}
 }
