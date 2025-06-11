@@ -39,6 +39,7 @@ public class Medic extends Player {
 		super.setColor(Color.BLUE);
 	}
 
+	@Override
 	public void setPlayerRecord(Player[] arr) {
 		this.playerRecord = arr;
 	}
@@ -255,10 +256,24 @@ public class Medic extends Player {
 			danger = danger * (1 - TRAVEL_IMPORTANCE * tx);
 		}
 
+		// Lower danger if a teammate is injured/downed at this tile
+		int i = 0;
+		while (i < playerRecord.length) {
+			Player p = playerRecord[i];
+			if (p != this && p.getX() == tx && p.getY() == ty) {
+				if (p.getEnergyLevel() <= 0) {
+					danger = danger * 0.01; // Very low danger to attract Medic
+				} else if (p.getEnergyLevel() < INJURED_THRESHOLD) {
+					danger = danger * 0.2;  // Moderately low danger
+				}
+			}
+			i = i + 1;
+		}
+
 		return danger;
 	}
 
-	public void tagAttempt() {
+	public void switchModes() {
 		System.out.println(getName() + " was tagged! Spinning and skipping next turn.");
 		spinInPlace();
 		skipNextTurn = true;
