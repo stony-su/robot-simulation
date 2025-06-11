@@ -17,6 +17,7 @@ public class Octopus extends Player {
 	private int targetX, targetY;
 	private double targetDistance;
 	private String targetName;
+	  private int wall1X, wall2X;
 
 
 
@@ -28,6 +29,8 @@ public class Octopus extends Player {
 		this.maxStepsPerMove = maxStepsPerMove;
 		super.setX(x);
 		super.setY(y);
+		 wall1X = 1;
+	        wall2X = 22;
 
 
 
@@ -40,39 +43,45 @@ public class Octopus extends Player {
 			int stepsNum = 1;
 			//System.out.println("About to move " + stepsNum + "steps");
 			for (int i = 0; i < stepsNum; i++) {
-				if (this.frontIsClear()) {
+				if (this.frontIsClear() && (stepsNum + this.x) != wall1X) {
 					super.move();
 					this.x = getAvenue();
 					this.y = getStreet();
-					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
-				}
-				
-				if (this.targetX == this.x && this.targetY == this.y) {
-					this.tagAttempt();
 					for (int j = 0; j < super.playerList.length; j++) {
-						if (super.playerList[j].getName().equals(this.targetName)) {
-							if (super.playerList[j].getType() == 3) {
-								super.playerList[j].updateDodge(super.playerList[j].getDodge() -1);
-							} else {
-								super.playerList[j].updateDodge(super.playerList[j].getDodge() +1);
-							}
+						if (super.playerList[i].getX()== this.x && this.y == super.playerList[i].getY()) {
+							this.tagAttempt();
+
 							break;
 						}
-						System.out.println("Am tagging: " + this.tagging);
-						System.out.println("resting");
-						this.chasing = false;
-
+						System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
 					}
 
+					if (this.targetX == this.x && this.targetY == this.y) {
+						this.tagAttempt();
+						for (int j = 0; j < super.playerList.length; j++) {
+							if (super.playerList[j].getName().equals(this.targetName)) {
+								if (super.playerList[j].getType() == 3) {
+									super.playerList[j].updateDodge(super.playerList[j].getDodge() -1);
+								} else {
+									super.playerList[j].updateDodge(super.playerList[j].getDodge() +1);
+								}
+								break;
+							}
+							System.out.println("Am tagging: " + this.tagging);
+							System.out.println("resting");
+							this.chasing = false;
 
+						}
+
+
+					}
+				}
+				if (stepsNum == maxStepsPerMove) {
+					this.energyLevel -= 2;
+				} else {
+					this.energyLevel -= 1;
 				}
 			}
-			if (stepsNum == maxStepsPerMove) {
-				this.energyLevel -= 2;
-			} else {
-				this.energyLevel -= 1;
-			}
-
 		} else {
 			if (this.frontIsClear()) {
 				super.move();
@@ -86,11 +95,17 @@ public class Octopus extends Player {
 	public void takeTurn() {
 		this.x = getAvenue();
 		this.y = getStreet();
+
 		this.tagging = false;
 		//System.out.println("Current X" + this.x + " current Y" +this.y);
 		//System.out.println(this.chasing);
 		if (!this.resting) {
 			this.chase();
+		}
+		this.x = getAvenue();
+		this.y = getStreet();
+		if (this.targetX == this.x && this.targetY == this.y) {
+			this.tagAttempt();
 		}
 		//System.out.println("Chasing");
 
@@ -211,13 +226,13 @@ public class Octopus extends Player {
 			this.chasing = true;
 			// first looking for medic
 			for (int i = 0; i < super.playerList.length; i++) {
-				if (super.playerList[i].getType() <= 2 ) {
+				if (super.playerList[i].getType() != 3) {
 					this.targetName = super.playerList[i].getName();
 					this.targetX = super.playerList[i].getX();
 					this.targetY = super.playerList[i].getY();
 					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
 					System.out.println(targetName);
-					
+
 				}
 			}
 		}
