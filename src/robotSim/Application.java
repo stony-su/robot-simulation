@@ -149,7 +149,7 @@ public class Application {
             if (arr[i].getName().equals(name)){
                 double dodge = arr[i].getDodgingAbility();
                 if (Math.random() > dodge) {
-                    ((Runner)arr[i]).switchModes();
+                    ((Runner)arr[i]).getTagged();
                 }
             }
         }
