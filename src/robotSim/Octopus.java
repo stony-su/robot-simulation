@@ -52,7 +52,7 @@ public class Octopus extends Player {
 					this.x = getAvenue();
 					this.y = getStreet();
 					for (int j = 0; j < super.playerList.length; j++) {
-						if (super.playerList[i].getX()== this.x && this.y == super.playerList[i].getY()) {
+						if (super.playerList[i].getX()== this.x && this.y == super.playerList[i].getY() && super.playerList[i].getType() != 3) {
 							this.targetName = super.playerList[i].getName();
 							this.tagAttempt();
 							this.lockOnTarget();
@@ -70,11 +70,13 @@ public class Octopus extends Player {
 								} else {
 									super.playerList[j].updateDodge(super.playerList[j].getDodge() +1);
 								}
+								
 								break;
 							}
 							System.out.println("Am tagging: " + this.tagging);
 							System.out.println("resting");
 							this.chasing = false;
+							this.lockOnTarget();
 
 						}
 
@@ -176,7 +178,7 @@ public class Octopus extends Player {
 				this.faceWest();
 				this.x = getAvenue();
 				this.y = getStreet();
-				for (int i =0; i < (this.x - this.targetX)+(this.gen.nextInt(5-1)+1); i++) {
+				for (int i =0; i < (this.x - this.targetX); i++) {
 					if (this.targetX == this.x) {
 						break;
 					}
@@ -239,19 +241,22 @@ public class Octopus extends Player {
 				super.playerList[i].updateCatchIndex(distanceCalc(super.playerList[i]));
 			}
 			this.sortByCatchability(super.playerList);
+			for (int i = 0; i < super.playerList.length; i++) {
+				System.out.println("Target name: " + super.playerList[i].getName() + " Target catchability: " + super.playerList[i].getCatchIndex());
+			}
 			this.chasing = true;
 			// first looking for medic
-			for (int i = 0; i < super.playerList.length; i++) {
-				if (super.playerList[i].getType() != 3) {
+			
+				if (super.playerList[0].getType() != 3) {
 					
-					this.targetName = super.playerList[i].getName();
-					this.targetX = super.playerList[i].getX();
-					this.targetY = super.playerList[i].getY();
+					this.targetName = super.playerList[0].getName();
+					this.targetX = super.playerList[0].getX();
+					this.targetY = super.playerList[0].getY();
 					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
 					System.out.println(targetName);
 
 				}
-			}
+			
 		}
 
 		if (this.chasing == true) {
