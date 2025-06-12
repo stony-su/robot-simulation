@@ -9,9 +9,9 @@ public class Runner extends Player {
 	private int stepsPerMove;
 	private Player octopus;
 	private playerRecord[] runnerRecord;
-	private double runnerAvoidance = 0.00025;
+	private double runnerAvoidance = 0.0002;
 	private double octopusAvoidance = 0.009;
-	private double algaeAvoidance = 0.1;
+	private double algaeAvoidance = 0.0075;
 	private boolean isAlgae;
 	private boolean goingLeft = false;
 	private final int CITY_LENGTH = 24;
@@ -110,6 +110,9 @@ public class Runner extends Player {
 	}
 	
 	public void changeDirection() {
+		if (this.getType() == 3)
+			return;
+		
 		turnLeft();
 		turnLeft();
 		move();
@@ -290,12 +293,11 @@ public class Runner extends Player {
 		
 		double distanceFromRunners = 0;
 		for(int i = 0; i < this.runnerRecord.length-1; i++) {
+			distanceFromRunners = accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
 			if (runnerRecord[i].getType() == 3) {
-				distanceFromRunners = accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
 				danger = danger * (1 - algaeAvoidance * distanceFromRunners);
 			}
 			else {
-				distanceFromRunners = accessDistance(targetX, targetY, runnerRecord[i].getX(), runnerRecord[i].getY());
 				danger = danger * (1 - runnerAvoidance * distanceFromRunners);
 			}
 		}
