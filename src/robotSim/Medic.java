@@ -58,7 +58,8 @@ public class Medic extends Player {
 		super.setY(getStreet());
 
 		if (isAlgae) {
-			System.out.println(getName() + " is algae and cannot move.");
+			System.out.println(getName() + " is algae and spins in place.");
+			spinInPlace();
 			return;
 		}
 
