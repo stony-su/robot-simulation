@@ -58,7 +58,7 @@ public class Runner extends Player {
 	 */
 	public Runner(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction, int stepsPerMove, Player octopus) {
 		//init constructor 
-		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, 6, 	x, direction);
+		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, y, 	x, direction);
 		
 		//init instance variables 
 		this.stepsPerMove = stepsPerMove;
