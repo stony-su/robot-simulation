@@ -75,18 +75,22 @@ public class Runner extends Player {
 	}
 		
 	/**
-	 * Switches the type of the runner
+	 * Tags the runner, becoming algae
 	 */
-	public void switchModes(){
-		//if is an algae, switch back
+
+	public void getTagged(){
+		isAlgae = true;
+		super.setColor(Color.GREEN);
+	}
+
+	/**
+	 * revives the runner, switching back to normal
+	 */
+	public void revive() {
+		//if is algae, switch back
 		if (isAlgae) {
 			isAlgae = false;
 			super.setColor(Color.RED);
-		}
-		//else, become algae
-		else {
-			isAlgae = true;
-			super.setColor(Color.GREEN);
 		}
 	}
 	
