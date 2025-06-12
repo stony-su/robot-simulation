@@ -38,7 +38,6 @@ public class Medic extends Player {
 		super.setColor(Color.BLUE);
 	}
 
-	@Override
 	public void setPlayerRecord(Player[] arr) {
 		this.playerRecord = arr;
 	}
