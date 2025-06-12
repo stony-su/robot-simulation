@@ -10,9 +10,8 @@ public class Medic extends Player {
 	private boolean goingLeft = false;
 	private boolean skipNextTurn = false;
 
-	// Constants
-	private final int INJURED_THRESHOLD = 50;
-	private final int MAX_ENERGY = 100;
+	private final int INJURED_THRESHOLD = 5;
+	private final int MAX_ENERGY = 10;
 	private final int MIN_REVIVE_ENERGY = 5;
 	private final int MAX_REVIVE_ENERGY = 10;
 	private final int MIN_HEAL_AMOUNT = 1;
@@ -23,7 +22,7 @@ public class Medic extends Player {
 	private final int MAX_STREET = 11;
 	private final int MIN_STREET = 0;
 	private final int MAX_AVENUE = 24;
-	private final int MIN_AVENUE = -1;
+	private final int MIN_AVENUE = 0;
 	private final double OCTOPUS_AVOIDANCE = 0.009;
 	private final double TRAVEL_IMPORTANCE = 0.01;
 	private final double OUT_OF_BOUNDS_DANGER = 1000000.0;
@@ -54,24 +53,80 @@ public class Medic extends Player {
 		super.setX(getAvenue());
 		super.setY(getStreet());
 
-		if (skipNextTurn == true) {
+		if (skipNextTurn) {
 			skipNextTurn = false;
 			System.out.println(getName() + " is recovering and skips this turn.");
 			return;
 		}
-	    
+
 		handleNearbyPlayers();
 
 		if (onRightWall()) {
 			goingLeft = true;
-		} else if (onLeftWall()) {
-			goingLeft = false;
+		} else {
+			if (onLeftWall()) {
+				goingLeft = false;
+			}
 		}
 
-		optimalMove();
+		Player nearestAlgae = null;
+		int minDist = Integer.MAX_VALUE;
+		int mx = getAvenue();
+		int my = getStreet();
+
+		for (int i = 0; i < playerRecord.length; i++) {
+			Player p = playerRecord[i];
+			if (p instanceof Runner) {
+				if (((Runner) p).isAlgae()) {
+					int px = p.getX();
+					int py = p.getY();
+					int dist = Math.abs(mx - px) + Math.abs(my - py);
+					if (dist < minDist) {
+						minDist = dist;
+						nearestAlgae = p;
+					}
+				}
+			}
+		}
+
+		if (nearestAlgae != null) {
+			System.out.println(getName() + " sees algae at (" + nearestAlgae.getY() + ", " + nearestAlgae.getX() + ")");
+			moveTowardAlgae(nearestAlgae);
+		} else {
+			System.out.println(getName() + " sees no algae. Performing optimal move.");
+			optimalMove();
+		}
 	}
 
+	private void moveTowardAlgae(Player algae) {
+		int targetX = algae.getX();
+		int targetY = algae.getY();
 
+		int bestX = getX();
+		int bestY = getY();
+		double bestDanger = 9999999;
+		int currDist = Math.abs(targetX - bestX) + Math.abs(targetY - bestY);
+
+		int[][] directions = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+		for (int i = 0; i < directions.length; i++) {
+			int[] dir = directions[i];
+			int nx = getX() + dir[0];
+			int ny = getY() + dir[1];
+
+			if (nx >= MIN_AVENUE && nx <= MAX_AVENUE && ny >= MIN_STREET && ny <= MAX_STREET) {
+				int newDist = Math.abs(targetX - nx) + Math.abs(targetY - ny);
+				double danger = accessDangerXY(nx, ny);
+				if (newDist < currDist || (newDist == currDist && danger < bestDanger)) {
+					bestX = nx;
+					bestY = ny;
+					bestDanger = danger;
+				}
+			}
+		}
+		goTo(bestY, bestX);
+	}
+
+	
 	private void handleNearbyPlayers() {
 		Random rand = new Random();
 		for (int i = 0; i < playerRecord.length; i++) {
@@ -81,74 +136,30 @@ public class Medic extends Player {
 			}
 
 			if (getX() == p.getX() && getY() == p.getY()) {
-				if (p.getEnergyLevel() <= 0) {
-					if (p instanceof Runner) {
-						((Runner) p).switchModes();
-					}
-					int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1);
-					newEnergy = newEnergy + MIN_REVIVE_ENERGY;
+				if (((Runner) p).isAlgae()) {
+					((Runner) p).switchModes();
+					int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1) + MIN_REVIVE_ENERGY;
 					p.setEnergyLevel(newEnergy);
 					System.out.println(getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
-				} else if (p.getEnergyLevel() < INJURED_THRESHOLD) {
-					int heal = rand.nextInt(MAX_HEAL_AMOUNT - MIN_HEAL_AMOUNT + 1);
-					heal = heal + MIN_HEAL_AMOUNT;
-					int boosted = p.getEnergyLevel() + heal;
-					if (boosted > MAX_ENERGY) {
-						boosted = MAX_ENERGY;
+				} else {
+					if (p.getEnergyLevel() < INJURED_THRESHOLD) {
+						int heal = rand.nextInt(MAX_HEAL_AMOUNT - MIN_HEAL_AMOUNT + 1) + MIN_HEAL_AMOUNT;
+						int boosted = Math.min(MAX_ENERGY, p.getEnergyLevel() + heal);
+						p.setEnergyLevel(boosted);
+						System.out.println(getName() + " healed " + p.getName() + " to " + boosted + " energy.");
 					}
-					p.setEnergyLevel(boosted);
-					System.out.println(getName() + " healed " + p.getName() + " to " + boosted + " energy.");
 				}
 			}
 		}
 	}
 
 	private void optimalMove() {
-		int totalTiles = 1 + 2 * stepsPerMove;
-		Location[] tiles = new Location[totalTiles];
-		int xShift = 0;
-		int yShift = stepsPerMove;
-		int x = getAvenue();
-		int y = getStreet();
-
-		for (int i = 0; i < stepsPerMove * 2; i = i + 2) {
-			if (goingLeft == false) {
-				tiles[i] = predictTileDanger(x + xShift, y + yShift, 0, new Location(x + xShift, y + yShift));
-				tiles[i + 1] = predictTileDanger(x + xShift, y - yShift, 0, new Location(x + xShift, y - yShift));
-			} else {
-				tiles[i] = predictTileDanger(x - xShift, y + yShift, 0, new Location(x - xShift, y + yShift));
-				tiles[i + 1] = predictTileDanger(x - xShift, y - yShift, 0, new Location(x - xShift, y - yShift));
-			}
-			xShift = xShift + 1;
-			yShift = yShift - 1;
-		}
-
-		if (goingLeft == true) {
-			tiles[totalTiles - 1] = predictTileDanger(x - stepsPerMove, y, 0, new Location(x - stepsPerMove, y));
+		if (goingLeft) {
+			pointWest();
 		} else {
-			tiles[totalTiles - 1] = predictTileDanger(x + stepsPerMove, y, 0, new Location(x + stepsPerMove, y));
+			pointEast();
 		}
-
-		for (int i = 1; i < tiles.length; i++) {
-			Location key = tiles[i];
-			int j = i - 1;
-			while (j >= 0 && tiles[j].getDanger() > key.getDanger()) {
-				tiles[j + 1] = tiles[j];
-				j = j - 1;
-			}
-			tiles[j + 1] = key;
-		}
-
-		int[][] path = tiles[0].getPath();
-		movePath(path);
-	}
-
-	private void movePath(int[][] path) {
-		for (int i = path.length; i > 0; i = i - 1) {
-			int street = path[i - 1][0];
-			int avenue = path[i - 1][1];
-			goTo(street, avenue);
-		}
+		move(stepsPerMove);
 	}
 
 	private void goTo(int street, int avenue) {
@@ -156,88 +167,38 @@ public class Medic extends Player {
 		goToStreet(street);
 	}
 
-	private void goToAvenue(int avenue) {
-		if (getAvenue() > avenue) {
-			pointWest();
-			move(getAvenue() - avenue);
-		} else if (getAvenue() < avenue) {
-			pointEast();
-			move(avenue - getAvenue());
-		}
-	}
-
 	private void goToStreet(int street) {
+		street = Math.max(MIN_STREET, Math.min(MAX_STREET, street));
 		if (getStreet() > street) {
 			pointNorth();
 			move(getStreet() - street);
-		} else if (getStreet() < street) {
-			pointSouth();
-			move(street - getStreet());
-		}
-	}
-
-	private boolean onLeftWall() {
-		if (getAvenue() == LEFT_WALL) {
-			return true;
 		} else {
-			return false;
-		}
-	}
-
-	private boolean onRightWall() {
-		if (getAvenue() == RIGHT_WALL) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private Location predictTileDanger(int xTarget, int yTarget, int step, Location tile) {
-		int x = getAvenue();
-		int y = getStreet();
-
-		if (x == xTarget && y == yTarget) {
-			tile.setDanger(0);
-			return tile;
-		}
-
-		if (step == 0) {
-			tile.setPath(new int[stepsPerMove][2]);
-		}
-
-		double totalXDanger;
-		if (goingLeft == true) {
-			totalXDanger = accessDangerXY(xTarget - 1, yTarget);
-		} else {
-			totalXDanger = accessDangerXY(xTarget + 1, yTarget);
-		}
-
-		double totalYDanger;
-		if (y < yTarget) {
-			totalYDanger = accessDangerXY(xTarget, yTarget + 1);
-		} else {
-			totalYDanger = accessDangerXY(xTarget, yTarget - 1);
-		}
-
-		if (x != xTarget) {
-			if (goingLeft == true) {
-				tile = predictTileDanger(xTarget + 1, yTarget, step + 1, tile);
-			} else {
-				tile = predictTileDanger(xTarget - 1, yTarget, step + 1, tile);
+			if (getStreet() < street) {
+				pointSouth();
+				move(street - getStreet());
 			}
-			tile.setDanger(tile.getDanger() + totalXDanger);
-		} else if (y != yTarget) {
-			if (y <= yTarget) {
-				tile = predictTileDanger(xTarget, yTarget - 1, step + 1, tile);
-			} else {
-				tile = predictTileDanger(xTarget, yTarget + 1, step + 1, tile);
-			}
-			tile.setDanger(tile.getDanger() + totalYDanger);
 		}
+	}
 
-		tile.getPath()[step][0] = xTarget;
-		tile.getPath()[step][1] = yTarget;
-		return tile;
+	private void goToAvenue(int avenue) {
+		avenue = Math.max(MIN_AVENUE, Math.min(MAX_AVENUE, avenue));
+		if (getAvenue() > avenue) {
+			pointWest();
+			move(getAvenue() - avenue);
+		} else {
+			if (getAvenue() < avenue) {
+				pointEast();
+				move(avenue - getAvenue());
+			}
+		}
+	}
+
+	public boolean onLeftWall() {
+		return getAvenue() == LEFT_WALL;
+	}
+
+	public boolean onRightWall() {
+		return getAvenue() == RIGHT_WALL;
 	}
 
 	private double accessDangerXY(int tx, int ty) {
@@ -250,27 +211,46 @@ public class Medic extends Player {
 		double distance = Math.sqrt(dx * dx + dy * dy);
 		double danger = 1 - distance * OCTOPUS_AVOIDANCE;
 
-		if (goingLeft == true) {
-			danger = danger * (1 - TRAVEL_IMPORTANCE * (CITY_LENGTH - tx));
+		if (goingLeft) {
+			danger *= (1 - TRAVEL_IMPORTANCE * (CITY_LENGTH - tx));
 		} else {
-			danger = danger * (1 - TRAVEL_IMPORTANCE * tx);
+			danger *= (1 - TRAVEL_IMPORTANCE * tx);
 		}
 
-		// Lower danger if a teammate is injured/downed at this tile
-		int i = 0;
-		while (i < playerRecord.length) {
+		for (int i = 0; i < playerRecord.length; i++) {
 			Player p = playerRecord[i];
 			if (p != this && p.getX() == tx && p.getY() == ty) {
-				if (p.getEnergyLevel() <= 0) {
-					danger = danger * 0.01; // Very low danger to attract Medic
-				} else if (p.getEnergyLevel() < INJURED_THRESHOLD) {
-					danger = danger * 0.2;  // Moderately low danger
+				if (p instanceof Runner && ((Runner) p).isAlgae()) {
+					danger *= 0.01;
+				} else {
+					if (p.getEnergyLevel() < INJURED_THRESHOLD) {
+						danger *= 0.2;
+					}
 				}
 			}
-			i = i + 1;
 		}
-
 		return danger;
+	}
+
+	@Override
+	public void move(int steps) {
+		for (int i = 0; i < steps; i++) {
+			if (getEnergyLevel() <= 0) {
+				System.out.println(getName() + " is exhausted. Recovering...");
+				spinInPlace();
+				setEnergyLevel(5);
+				skipNextTurn = true;
+				return;
+			}
+
+			if (!frontIsClear()) {
+				break;
+			}
+
+			super.move(1);
+			setEnergyLevel(getEnergyLevel() - 1);
+			System.out.println(getName() + " moved 1 tile and now has " + getEnergyLevel() + " energy.");
+		}
 	}
 
 	public void switchModes() {
