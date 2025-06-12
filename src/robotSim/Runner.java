@@ -1,4 +1,4 @@
-package robotSim;
+package robotSimCopy;
 import java.awt.Color;
 import java.math.*;
 import becker.robots.*;
@@ -443,14 +443,14 @@ public class Runner extends Player {
 		//loop through runner record
 		for(int i = 0; i < this.runnerRecord.length; i++) {
 			//if runner is an algae, avoid it more
+			distanceFromRunners = accessDistance(targetX, targetY, this.runnerRecord[i].getX(), this.runnerRecord[i].getY());
 			if (this.runnerRecord[i].getType() == 3) {
-				distanceFromRunners = accessDistance(targetX, targetY, this.runnerRecord[i].getX(), this.runnerRecord[i].getY());
-				if (distanceFromRunners <= 1)
-					danger = danger * (1 + this.ALGAEAVOIDANCE / distanceFromRunners);
+				if (runnerRecord[i].getX() == targetX && runnerRecord[i].getY() == targetY) {
+					return 100000;
+				}
 			}
 			//if regular runner, avoid it less
 			else {
-				distanceFromRunners = accessDistance(targetX, targetY, this.runnerRecord[i].getX(), this.runnerRecord[i].getY());
 				danger = danger * (1 - this.RUNNER_AVOIDANCE * distanceFromRunners);
 			}
 		}
