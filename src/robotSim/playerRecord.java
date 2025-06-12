@@ -42,7 +42,20 @@ public class playerRecord {
     }
     
     public void updateCatchIndex(double distance) {
+    	if (type == 1) {
+    		this.catchIndex = -50;
+    	} else if (type == 2) {
+    		this.catchIndex = 0;
+    	} else if (type == 3) {
+    		this.catchIndex = 999;
+    	}
     	this.catchIndex += distance;
+    	this.catchIndex += this.dodgeAbility;
+    }
+    public void updateCatchIndex(int type) {
+    	if (type == 3) {
+    		this.catchIndex = 999;
+    	}
     	this.catchIndex += this.type;
     	this.catchIndex += this.dodgeAbility;
     }
