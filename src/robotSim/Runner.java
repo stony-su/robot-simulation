@@ -22,7 +22,7 @@ public class Runner extends Player {
 	//variables to determine robot's aversion to certain objects
 	private final double RUNNER_AVOIDANCE = 0.0002;
 	private final double OCTOPUS_AVOIDANCE = 0.009;
-	private final double ALGAEAVOIDANCE = 0.0075;
+	private final double ALGAEAVOIDANCE = 0.02;
 	private final double TRAVEL_IMPORTANCE = 0.01;
 	private final int MIN_STARTLE_MAX = 10;
 	private final int MIN_STARTLE_MIN = 3;
@@ -440,7 +440,8 @@ public class Runner extends Player {
 			//if runner is an algae, avoid it more
 			if (this.runnerRecord[i].getType() == 3) {
 				distanceFromRunners = accessDistance(targetX, targetY, this.runnerRecord[i].getX(), this.runnerRecord[i].getY());
-				danger = danger * (1 - this.ALGAEAVOIDANCE * distanceFromRunners);
+				if (distanceFromRunners <= 3)
+					danger = danger * (1 + this.ALGAEAVOIDANCE / distanceFromRunners);
 			}
 			//if regular runner, avoid it less
 			else {
