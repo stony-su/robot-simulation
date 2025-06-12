@@ -1,4 +1,3 @@
-
 package robotSim;
 import java.util.*;
 import becker.robots.*;
@@ -153,7 +152,7 @@ public class Application {
      */
     private static boolean everyoneOnWall(Player[] playerArr) {
         for (int i = 0; i < playerArr.length-2; i++) {
-            if (!onWall(playerArr[i])) {
+            if (!(onWall(playerArr[i]) || playerArr[i].getType() == 3)) {
                 return false;
             }
         }
