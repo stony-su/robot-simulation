@@ -18,6 +18,7 @@ public class Octopus extends Player {
 	private double targetDistance;
 	private String targetName;
 	  private int wall1X, wall2X;
+	  private boolean everyoneOnWall;
 
 
 
@@ -35,7 +36,10 @@ public class Octopus extends Player {
 
 
 	}
-
+	
+	public void updateIsOnWall(boolean isOnWall) {
+		this.everyoneOnWall = isOnWall;
+	}
 	public void move() {
 
 		if (this.chasing) {
@@ -43,14 +47,15 @@ public class Octopus extends Player {
 			int stepsNum = 1;
 			//System.out.println("About to move " + stepsNum + "steps");
 			for (int i = 0; i < stepsNum; i++) {
-				if (this.frontIsClear() && (stepsNum + this.x) != wall1X) {
+				if (this.frontIsClear() && (this.x) != wall1X && this.x != wall2X && this.everyoneOnWall == false) {
 					super.move();
 					this.x = getAvenue();
 					this.y = getStreet();
 					for (int j = 0; j < super.playerList.length; j++) {
 						if (super.playerList[i].getX()== this.x && this.y == super.playerList[i].getY()) {
+							this.targetName = super.playerList[i].getName();
 							this.tagAttempt();
-
+							this.lockOnTarget();
 							break;
 						}
 						System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
@@ -75,11 +80,22 @@ public class Octopus extends Player {
 
 
 					}
+					
 				}
 				if (stepsNum == maxStepsPerMove) {
 					this.energyLevel -= 2;
 				} else {
 					this.energyLevel -= 1;
+				}
+				
+				if (this.x == wall1X) {
+					this.faceEast();
+					super.move();
+				}
+				
+				if (this.x == wall2X) {
+					this.faceWest();
+					super.move();
 				}
 			}
 		} else {
@@ -90,7 +106,7 @@ public class Octopus extends Player {
 
 	}
 
-
+	
 
 	public void takeTurn() {
 		this.x = getAvenue();
@@ -227,6 +243,7 @@ public class Octopus extends Player {
 			// first looking for medic
 			for (int i = 0; i < super.playerList.length; i++) {
 				if (super.playerList[i].getType() != 3) {
+					
 					this.targetName = super.playerList[i].getName();
 					this.targetX = super.playerList[i].getX();
 					this.targetY = super.playerList[i].getY();
