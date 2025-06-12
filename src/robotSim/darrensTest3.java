@@ -1,4 +1,4 @@
-package robotSimCopy;
+package robotSim;
 import java.util.*;
 import becker.robots.*;
 /**
@@ -6,10 +6,10 @@ import becker.robots.*;
  * @author Darren Su
  * @version June 12th, 2025
  */
-public class Application {
+public class darrensTest3 {
 	//constants & variables
-    private final static int OCTO_NUM = 1;
-    private final static int PLAYER_NUM = 5;
+    private final static int OCTO_NUM = 0;
+    private final static int PLAYER_NUM = 2;
     private final static int ENERGY_LIMIT = 10;
     private final static int STEPS_LIMIT = 8;
     private final static int DODGE_LIMIT = 5;
@@ -32,7 +32,7 @@ public class Application {
         createWalls(city);
         
         //create arr of all players
-        Player [] playerArr = new Player [PLAYER_NUM + OCTO_NUM + 1];
+        Player [] playerArr = new Player [PLAYER_NUM + OCTO_NUM];
         
         //potential names 
         String[] names = {
@@ -44,30 +44,28 @@ public class Application {
         };
 
         //random init
-        Random gen = new Random ();
-
-        //create octopus
-        Player octopus = new Octopus (names[names.length-1], gen.nextInt(ENERGY_LIMIT-1)+1, 5, 0.0, city, 6, 12, Direction.WEST);
-        playerArr[playerArr.length-1] = octopus;
-        
+        Random gen = new Random ();        
      
         //create runners
-        for (int i = 0; i < PLAYER_NUM; i++) {
+        for (int i = 0; i < 1; i++) {
         	//gives runner random dodge ability
         	double dodge = (gen.nextInt(DODGE_LIMIT-1)+1)/10;
             Player runner = new Runner (names[i], gen.nextInt(ENERGY_LIMIT-1)+1,
-                                        gen.nextInt(STEPS_LIMIT-1)+1,
-                                        dodge, city, gen.nextInt(11)+1, 1,
-                                        Direction.EAST, gen.nextInt(STEPS_LIMIT/2-1)+1, octopus);
+            							gen.nextInt(STEPS_LIMIT-1)+1,
+                                        dodge, city, 6, 6,
+                                        Direction.EAST, gen.nextInt(STEPS_LIMIT/2-1)+1, null);
             playerArr[i] = runner;
         }
-
-        // Add Medic
-        Player medic = new Medic("Medic", 10, 1, 0.0, city, 1, 1, Direction.SOUTH, 2, octopus);
-        playerArr[playerArr.length-2] = medic;
+        
+        Player algae = new Runner ("Algae", gen.nextInt(ENERGY_LIMIT-1)+1,
+				gen.nextInt(STEPS_LIMIT-1)+1,
+                0, city, 6, 10,
+                Direction.EAST, gen.nextInt(STEPS_LIMIT/2-1)+1, null);
+        playerArr[1] = algae;
+        
 
         // Create records of all runners and medics
-        playerRecord[] runnerArr = new playerRecord[PLAYER_NUM + 1];
+        playerRecord[] runnerArr = new playerRecord[PLAYER_NUM];
         for (int i = 0; i < runnerArr.length; i++) {
             runnerArr[i] = new playerRecord(playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
         }
@@ -76,49 +74,24 @@ public class Application {
         for (int i = 0; i < runnerArr.length; i++) {
             playerArr[i].setPlayerRecord(runnerArr);
         }
-
-        //gives octopus and medic a copy of records
-        octopus.setPlayerRecord(runnerArr);
-        ((Medic)medic).setPlayerRecord(playerArr);
         
+        ((Runner)playerArr[1]).getTagged();
         //main game loop, stops when all players are caught
-        while (!allPlayersCaught) {
+        while (true) {
         	//everyone takes a turn
             for (int i = 0; i < playerArr.length; i++) {
-
-            	//if everyone is on the wall, call octopus
-                if (everyoneOnWall(playerArr)) {
-                    callOctopus();
-                }
-                
-                //updates player records for person taking turn
+            	
+            	//updates player records for person taking turn
                 playerRecord[] recordArr = updateRecords(playerArr);
                 playerArr[i].setPlayerRecord(recordArr);
                 
-                //medic and algae always take their turn
-                if (playerArr[i].getType() == 1 || playerArr[i].getType() == 3) {
-                	playerArr[i].takeTurn();
-                
-                //if runner is on wall, skip it's turn
-                } else if (playerArr[i].getType() == 2 && !onWall(playerArr[i])) {
-                    playerArr[i].takeTurn();
+            	//if everyone is on the wall, call octopus
+                if (onWall(playerArr[i])) {
+                	((Runner)playerArr[i]).changeDirection();
+                }               
+                playerArr[i].takeTurn();
                  
-                // if player is octopus, take it's turn
-                } else if (playerArr[i].getType() == 4) {
-                    playerArr[i].takeTurn();
-                    
-                    //if octopus has tagged someone this turn, trigger the tag
-                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
-                    if (((Octopus) playerArr[i]).getTagging()) {
-                    	//get name of victim
-                        String name = ((Octopus)playerArr[i]).getTargetName();
-                        triggerTag(name, playerArr);
-                    }
-                }
-                ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
-
-                //update player records based on movements this turn
-                updateStatus(playerArr);
+                
             }
         }
     }
@@ -192,7 +165,7 @@ public class Application {
      * @return an array of all player records
      */
     private static playerRecord[] updateRecords(Player[] playerArr) {
-        playerRecord[] runnerArr = new playerRecord[PLAYER_NUM + 1];
+        playerRecord[] runnerArr = new playerRecord[PLAYER_NUM];
         for (int i = 0; i < runnerArr.length; i++) {
             runnerArr[i] = new playerRecord(playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
         }
@@ -212,24 +185,4 @@ public class Application {
         allPlayersCaught = true;
     }
 
-    /**
-     * when tag is called, random chance for the player to be tagged based on dodge ability
-     * @param name name of player whom is tested for tag 
-     * @param arr arr of all players
-     * @post player might become algae
-     */
-    private static void triggerTag(String name, Player[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            if (arr[i].getName().equals(name)){
-                double dodge = arr[i].getDodgingAbility();
-                if (Math.random() > dodge) {
-                	if (arr[i].getType() == 2)
-                		((Runner)arr[i]).getTagged();
-                	else if (arr[i].getType() == 1)
-                		((Medic)arr[i]).switchModes();
-
-                }
-            }
-        }
-    }
 }

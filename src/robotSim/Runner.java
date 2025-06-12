@@ -1,4 +1,4 @@
-package robotSim;
+package robotSimCopy;
 import java.awt.Color;
 import java.math.*;
 import becker.robots.*;
@@ -109,11 +109,16 @@ public class Runner extends Player {
 				this.energyHeld = this.energyHeld + this.energyRecovery;
 			
 			//speed up if close to octopus
-			double distanceFromOctopus = this.accessDistance(getAvenue(), getStreet(), this.octopus.getX(), this.octopus.getY());
-			if (distanceFromOctopus <this.minStartle && this.energyHeld > this.energyCap/3)
-				this.stepsPerMove = super.getMaxStepsPerMove();
-			else
+			if (octopus != null) {
+				double distanceFromOctopus = this.accessDistance(getAvenue(), getStreet(), this.octopus.getX(), this.octopus.getY());
+				if (distanceFromOctopus <this.minStartle && this.energyHeld > this.energyCap/3)
+					this.stepsPerMove = super.getMaxStepsPerMove();
+				else
+					this.stepsPerMove = this.energyRecovery;
+			}
+			else {
 				this.stepsPerMove = this.energyRecovery;
+			}
 			
 			//get other runner's record
 			this.runnerRecord = super.getPlayerRecord();
@@ -181,7 +186,7 @@ public class Runner extends Player {
 		tiles = this.insertionSort(tiles);
 		
 		//debug method
-		//printTiles(tiles);
+		printTiles(tiles);
 		
 		//path is set to least dangerous path
 		int [][] path = tiles[0].getPath();
@@ -459,8 +464,10 @@ public class Runner extends Player {
 		}
 		
 		//avoid the octopus
-		double distanceFromOctopus = accessDistance(targetX, targetY, this.octopus.getX(), this.octopus.getY());
-		danger = danger * (1 - distanceFromOctopus*this.OCTOPUS_AVOIDANCE) ;
+		if (octopus != null) {
+			double distanceFromOctopus = accessDistance(targetX, targetY, this.octopus.getX(), this.octopus.getY());
+			danger = danger * (1 - distanceFromOctopus*this.OCTOPUS_AVOIDANCE) ;
+		}
 		
 		//return danger value
 		return danger;
