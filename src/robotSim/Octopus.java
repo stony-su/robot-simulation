@@ -70,13 +70,14 @@ public class Octopus extends Player {
 								} else {
 									super.playerList[j].updateDodge(super.playerList[j].getDodge() +1);
 								}
-								
+								super.playerList[i].updateCatchIndex(3);
 								break;
 							}
+							this.lockOnTarget();
 							System.out.println("Am tagging: " + this.tagging);
 							System.out.println("resting");
 							this.chasing = false;
-							this.lockOnTarget();
+							
 
 						}
 
@@ -111,6 +112,7 @@ public class Octopus extends Player {
 	
 
 	public void takeTurn() {
+		
 		this.x = getAvenue();
 		this.y = getStreet();
 
@@ -120,10 +122,20 @@ public class Octopus extends Player {
 		if (!this.resting) {
 			this.chase();
 		}
+		for (int i =0; i< super.playerList.length; i++) {
+			if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
+				super.playerList[i].updateCatchIndex(3);
+				this.lockOnTarget();
+			}
+		}
 		this.x = getAvenue();
 		this.y = getStreet();
-		if (this.targetX == this.x && this.targetY == this.y) {
-			this.tagAttempt();
+		
+		for (int i =0; i< super.playerList.length; i++) {
+			if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
+				super.playerList[i].updateCatchIndex(3);
+				this.lockOnTarget();
+			}
 		}
 		//System.out.println("Chasing");
 
@@ -137,6 +149,10 @@ public class Octopus extends Player {
 		for (int i = 0; i < super.playerList.length; i++) {
 			if (super.playerList[i].getName().equals(this.targetName)) {
 				System.out.println("Target type" + super.playerList[i].getType());
+				if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
+					super.playerList[i].updateCatchIndex(3);
+					this.lockOnTarget();
+				}
 			}
 
 
@@ -278,7 +294,7 @@ public class Octopus extends Player {
 		final int ARRAYLENGTH = numbersArray.length;
 		for (int i = 0; i < ARRAYLENGTH; i++) {
 			for (int j = i; j > 0; j--) {
-				if (distanceCalc(numbersArray[j]) < distanceCalc(numbersArray[j-1])) {
+				if ((numbersArray[j]).getCatchIndex() < (numbersArray[j-1]).getCatchIndex()) {
 					swap(j,j-1, numbersArray);
 				}
 			}
