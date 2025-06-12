@@ -5,14 +5,15 @@ import becker.robots.*;
 import java.util.*;
 
 public class Medic extends Player {
+	Random rand = new Random();
+
 	private Player[] playerRecord;
 	private Player octopus;
 	private boolean goingLeft = false;
 	private boolean skipNextTurn = false;
 	private boolean isAlgae = false;
 	private boolean startedLeft = false;
-	private boolean touchedOppositeWall = false;
-
+	private boolean touchedOppositeWall = true;
 	private final int INJURED_THRESHOLD = 5;
 	private final int MAX_ENERGY = 10;
 	private final int MIN_REVIVE_ENERGY = 5;
@@ -33,9 +34,9 @@ public class Medic extends Player {
 	private final int stepsPerMove;
 
 	public Medic(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x,
-			Direction direction, int stepsPerMove, Player octopus) {
+			Direction direction, Player octopus) {
 		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
-		this.stepsPerMove = stepsPerMove;
+		this.stepsPerMove = maxStepsPerMove;
 		this.octopus = octopus;
 		this.startedLeft = (x == LEFT_WALL);
 		super.setLabel(super.getName());
@@ -83,25 +84,9 @@ public class Medic extends Player {
 			}
 		}
 
-		Player nearestAlgae = null;
-		int minDist = Integer.MAX_VALUE;
 		int mx = getAvenue();
 		int my = getStreet();
-
-		for (int i = 0; i < playerRecord.length; i++) {
-			Player p = playerRecord[i];
-			if (p instanceof Runner) {
-				if (((Runner) p).getType() == 3) {
-					int px = p.getX();
-					int py = p.getY();
-					int dist = Math.abs(mx - px) + Math.abs(my - py);
-					if (dist < minDist) {
-						minDist = dist;
-						nearestAlgae = p;
-					}
-				}
-			}
-		}
+		Player nearestAlgae = findNearestAlgae(mx, my);
 
 		if (nearestAlgae != null) {
 			System.out.println(getName() + " sees algae at (" + nearestAlgae.getY() + ", " + nearestAlgae.getX() + ")");
@@ -110,6 +95,46 @@ public class Medic extends Player {
 			System.out.println(getName() + " sees no algae. Performing optimal move.");
 			optimalMove();
 		}
+		
+	}
+
+	private Player findNearestAlgae(int mx, int my) {
+		Player nearestAlgae = null;
+		ArrayList<Player> algaeList = new ArrayList<>();
+
+		for (int i = 0; i < playerRecord.length; i++) {
+			Player p = playerRecord[i];
+			if (p instanceof Runner && ((Runner) p).getType() == 3) {
+				algaeList.add(p);
+			}
+		}
+
+		for (int i = 0; i < algaeList.size() - 1; i++) {
+			int minIndex = i;
+			for (int j = i + 1; j < algaeList.size(); j++) {
+				Player pj = algaeList.get(j);
+				Player pMin = algaeList.get(minIndex);
+
+				int distJ = Math.abs(mx - pj.getX()) + Math.abs(my - pj.getY());
+				int distMin = Math.abs(mx - pMin.getX()) + Math.abs(my - pMin.getY());
+
+				if (distJ < distMin) {
+					minIndex = j;
+				}
+			}
+
+			if (minIndex != i) {
+				Player temp = algaeList.get(i);
+				algaeList.set(i, algaeList.get(minIndex));
+				algaeList.set(minIndex, temp);
+			}
+		}
+
+		if (algaeList.size() > 0) {
+			nearestAlgae = algaeList.get(0);
+		}
+
+		return nearestAlgae;
 	}
 
 	private void checkWallContact() {
@@ -149,7 +174,6 @@ public class Medic extends Player {
 	}
 
 	private void handleNearbyPlayers() {
-		Random rand = new Random();
 		for (int i = 0; i < playerRecord.length; i++) {
 			Player p = playerRecord[i];
 			if (p == this) {
@@ -157,25 +181,42 @@ public class Medic extends Player {
 			}
 
 			if (getX() == p.getX() && getY() == p.getY()) {
-				if (((Runner) p).getType() == 3) {
-					if (touchedOppositeWall) {
-						((Runner) p).revive();
-						int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1) + MIN_REVIVE_ENERGY;
-						p.setEnergyLevel(newEnergy);
-						System.out.println(getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
-					} else {
-						System.out.println(getName() + " sees " + p.getName() + " but cannot revive yet.");
-					}
-				} else {
-					if (p.getEnergyLevel() < INJURED_THRESHOLD) {
-						int heal = rand.nextInt(MAX_HEAL_AMOUNT - MIN_HEAL_AMOUNT + 1) + MIN_HEAL_AMOUNT;
-						int boosted = Math.min(MAX_ENERGY, p.getEnergyLevel() + heal);
-						p.setEnergyLevel(boosted);
-						System.out.println(getName() + " healed " + p.getName() + " to " + boosted + " energy.");
-					}
+				if (isAlgae(p)) {
+					reviveAlgae(p);
+				}
+
+				else if (isInjured(p)) {
+					healPlayer(p);
 				}
 			}
 		}
+	}
+
+	private void reviveAlgae(Player p) {
+		if (touchedOppositeWall) {
+			((Runner) p).revive();
+			int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1) + MIN_REVIVE_ENERGY;
+			p.setEnergyLevel(newEnergy);
+			System.out.println(getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
+		} else {
+			System.out.println(getName() + " sees " + p.getName() + " but cannot revive yet.");
+		}
+	}
+
+	private void healPlayer(Player p) {
+		int heal = rand.nextInt(MAX_HEAL_AMOUNT - MIN_HEAL_AMOUNT + 1) +
+				MIN_HEAL_AMOUNT;
+		int boosted = Math.min(MAX_ENERGY, p.getEnergyLevel() + heal);
+		p.setEnergyLevel(boosted);
+		System.out.println(getName() + " healed " + p.getName() + " to " + boosted + " energy.");
+	}
+
+	private boolean isAlgae(Player p) {
+		return (((Runner) p).getType() == 3);
+	}
+
+	private boolean isInjured(Player p) {
+		return p.getEnergyLevel() < INJURED_THRESHOLD;
 	}
 
 	private void optimalMove() {
