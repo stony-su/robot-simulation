@@ -20,9 +20,9 @@ public class Runner extends Player {
 	private playerRecord[] runnerRecord;
 	
 	//variables to determine robot's aversion to certain objects
-	private final double RUNNER_AVOIDANCE = 0.00025;
+	private final double RUNNER_AVOIDANCE = 0.0002;
 	private final double OCTOPUS_AVOIDANCE = 0.009;
-	private final double ALGAEAVOIDANCE = 0.01;
+	private final double ALGAEAVOIDANCE = 0.0075;
 	private final double TRAVEL_IMPORTANCE = 0.01;
 	private final int MIN_STARTLE_MAX = 10;
 	private final int MIN_STARTLE_MIN = 3;
@@ -190,6 +190,8 @@ public class Runner extends Player {
 	 * do a 180 and move toward to begin new octopus round
 	 */
 	public void changeDirection() {
+		if (this.getType() == 3)
+			return;
 		super.turnLeft();
 		super.turnLeft();
 		super.move();
