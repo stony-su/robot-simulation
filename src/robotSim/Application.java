@@ -30,7 +30,7 @@ public class Application {
         Random gen = new Random ();
 
         Player octopus = new Octopus (names[names.length-1], gen.nextInt(ENERGY_LIMIT-1)+1, 5, 0.0, city, 6, 12, Direction.WEST);
-        playerArr[playerArr.length-2] = octopus;
+        playerArr[playerArr.length-1] = octopus;
 
         for (int i = 0; i < PLAYER_NUM; i++) {
             Player runner = new Runner (names[i], gen.nextInt(ENERGY_LIMIT-1)+1,
@@ -42,7 +42,7 @@ public class Application {
 
         // Add Medic
         Player medic = new Medic("Medic", 10, 1, 0.0, city, 1, 1, Direction.SOUTH, 2, octopus);
-        playerArr[playerArr.length-1] = medic;
+        playerArr[playerArr.length-2] = medic;
 
         // Create records
         playerRecord[] runnerArr = new playerRecord[PLAYER_NUM + 1];
@@ -51,11 +51,11 @@ public class Application {
         }
 
         for (int i = 0; i < runnerArr.length; i++) {
-            playerArr[i].setPlayerRecord(playerArr);
+            playerArr[i].setPlayerRecord(runnerArr);
         }
 
-        octopus.setPlayerRecord(playerArr);
-        medic.setPlayerRecord(playerArr);
+        octopus.setPlayerRecord(runnerArr);
+        ((Medic)medic).setPlayerRecord(playerArr);
         
         while (!allPlayersCaught) {
             for (int i = 0; i < playerArr.length; i++) {
@@ -93,7 +93,7 @@ public class Application {
     }
 
     private static boolean onWall(Player player) {
-        return ((Player) player).onRightWall() || ((Player) player).onLeftWall();
+        return ((Runner) player).onRightWall() || ((Runner) player).onLeftWall();
     }
 
     private static boolean everyoneOnWall(Player[] playerArr) {
