@@ -66,6 +66,7 @@ public class Application {
 
                 if (everyoneOnWall(playerArr)) {
                     callOctopus();
+                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 }
 
                 playerRecord[] recordArr = updateRecords(playerArr);
@@ -73,10 +74,13 @@ public class Application {
 
                 if (playerArr[i].getType() == 1) {
                 	playerArr[i].takeTurn();
+                	((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 } else if (playerArr[i].getType() != 4 && !onWall(playerArr[i])) {
                     playerArr[i].takeTurn();
+                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 } else if (playerArr[i].getType() == 4) {
                     playerArr[i].takeTurn();
+                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                     if (((Octopus) playerArr[i]).getTagging()) {
                         String name = ((Octopus)playerArr[i]).getTargetName();
                         triggerTag(name, playerArr);
@@ -97,7 +101,14 @@ public class Application {
     }
 
     private static boolean onWall(Player player) {
-        return ((Runner) player).onRightWall() || ((Runner) player).onLeftWall();
+    	if (player.getType() == 2) {
+    		return ((Runner) player).onRightWall() || ((Runner) player).onLeftWall();
+    	} else if (player.getType() == 1) {
+    		return ((Medic) player).onRightWall() || ((Runner) player).onLeftWall();
+    	} else {
+    		return false;
+    	}
+		
     }
 
     private static boolean everyoneOnWall(Player[] playerArr) {
