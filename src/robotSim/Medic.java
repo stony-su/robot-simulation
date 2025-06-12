@@ -9,8 +9,9 @@ public class Medic extends Player {
 	private Player octopus;
 	private boolean goingLeft = false;
 	private boolean skipNextTurn = false;
-	private boolean revivedThisTurn = false;
 	private boolean isAlgae = false;
+	private boolean startedLeft = false;
+	private boolean touchedOppositeWall = false;
 
 	private final int INJURED_THRESHOLD = 5;
 	private final int MAX_ENERGY = 10;
@@ -36,6 +37,7 @@ public class Medic extends Player {
 		super(name, energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
 		this.stepsPerMove = stepsPerMove;
 		this.octopus = octopus;
+		this.startedLeft = (x == LEFT_WALL);
 		super.setLabel(super.getName());
 		super.setColor(Color.BLUE);
 	}
@@ -62,6 +64,8 @@ public class Medic extends Player {
 			spinInPlace();
 			return;
 		}
+
+		checkWallContact();
 
 		if (skipNextTurn) {
 			skipNextTurn = false;
@@ -108,6 +112,14 @@ public class Medic extends Player {
 		}
 	}
 
+	private void checkWallContact() {
+		if (startedLeft && getAvenue() == RIGHT_WALL) {
+			touchedOppositeWall = true;
+		} else if (!startedLeft && getAvenue() == LEFT_WALL) {
+			touchedOppositeWall = true;
+		}
+	}
+
 	private void moveTowardAlgae(Player algae) {
 		int targetX = algae.getX();
 		int targetY = algae.getY();
@@ -146,10 +158,14 @@ public class Medic extends Player {
 
 			if (getX() == p.getX() && getY() == p.getY()) {
 				if (((Runner) p).getType() == 3) {
-					((Runner) p).revive();
-					int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1) + MIN_REVIVE_ENERGY;
-					p.setEnergyLevel(newEnergy);
-					System.out.println(getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
+					if (touchedOppositeWall) {
+						((Runner) p).revive();
+						int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1) + MIN_REVIVE_ENERGY;
+						p.setEnergyLevel(newEnergy);
+						System.out.println(getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
+					} else {
+						System.out.println(getName() + " sees " + p.getName() + " but cannot revive yet.");
+					}
 				} else {
 					if (p.getEnergyLevel() < INJURED_THRESHOLD) {
 						int heal = rand.nextInt(MAX_HEAL_AMOUNT - MIN_HEAL_AMOUNT + 1) + MIN_HEAL_AMOUNT;
@@ -283,44 +299,44 @@ public class Medic extends Player {
 
 	private void pointTo(Direction direction) {
 		switch (direction) {
-		case NORTH:
-			if (isFacingEast()) {
-				turnLeft();
-			} else if (isFacingSouth()) {
-				turnAround();
-			} else if (isFacingWest()) {
-				turnRight();
-			}
-			break;
-		case SOUTH:
-			if (isFacingEast()) {
-				turnRight();
-			} else if (isFacingNorth()) {
-				turnAround();
-			} else if (isFacingWest()) {
-				turnLeft();
-			}
-			break;
-		case WEST:
-			if (isFacingSouth()) {
-				turnRight();
-			} else if (isFacingEast()) {
-				turnAround();
-			} else if (isFacingNorth()) {
-				turnLeft();
-			}
-			break;
-		case EAST:
-			if (isFacingSouth()) {
-				turnLeft();
-			} else if (isFacingWest()) {
-				turnAround();
-			} else if (isFacingNorth()) {
-				turnRight();
-			}
-			break;
-		default:
-			break;
+			case NORTH:
+				if (isFacingEast()) {
+					turnLeft();
+				} else if (isFacingSouth()) {
+					turnAround();
+				} else if (isFacingWest()) {
+					turnRight();
+				}
+				break;
+			case SOUTH:
+				if (isFacingEast()) {
+					turnRight();
+				} else if (isFacingNorth()) {
+					turnAround();
+				} else if (isFacingWest()) {
+					turnLeft();
+				}
+				break;
+			case WEST:
+				if (isFacingSouth()) {
+					turnRight();
+				} else if (isFacingEast()) {
+					turnAround();
+				} else if (isFacingNorth()) {
+					turnLeft();
+				}
+				break;
+			case EAST:
+				if (isFacingSouth()) {
+					turnLeft();
+				} else if (isFacingWest()) {
+					turnAround();
+				} else if (isFacingNorth()) {
+					turnRight();
+				}
+				break;
+			default:
+				break;
 		}
 	}
 }
