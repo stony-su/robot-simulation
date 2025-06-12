@@ -55,6 +55,7 @@ public class Octopus extends Player {
 						if (super.playerList[i].getX()== this.x && this.y == super.playerList[i].getY() && super.playerList[i].getType() != 3) {
 							this.targetName = super.playerList[i].getName();
 							this.tagAttempt();
+							this.chasing = false;
 							this.lockOnTarget();
 							break;
 						}
@@ -125,6 +126,7 @@ public class Octopus extends Player {
 		for (int i =0; i< super.playerList.length; i++) {
 			if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
 				super.playerList[i].updateCatchIndex(3);
+				this.chasing = false;
 				this.lockOnTarget();
 			}
 		}
@@ -151,6 +153,7 @@ public class Octopus extends Player {
 				System.out.println("Target type" + super.playerList[i].getType());
 				if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
 					super.playerList[i].updateCatchIndex(3);
+					this.chasing = false;
 					this.lockOnTarget();
 				}
 			}
@@ -187,10 +190,38 @@ public class Octopus extends Player {
 	}
 
 	private void advanceToTarget() {
-		if (this.targetX != this.x) {
+		if (this.targetY != this.y) {
 			//System.out.println("I am not at the target's x");
-			if (this.targetX < this.x) {
+			if (this.targetY < this.y) {
 				//System.out.println("I am to the east of the target's x");
+				this.faceNorth();
+				this.x = getAvenue();
+				this.y = getStreet();
+				for (int i =0; i < (this.y - this.targetY)*2; i++) {
+					if (this.targetY == this.y) {
+						break;
+					}
+					System.out.println(this.y - this.targetY);
+					this.move();
+				}
+			} else if (this.targetY > this.y) {
+				//System.out.println("I am to the west of the target's x");
+				this.faceSouth();
+				this.x = getAvenue();
+				this.y = getStreet();
+				for (int i =0; i < (this.targetY - this.y)*2; i++) {
+					if (this.targetY == this.y) {
+						break;
+					}
+					System.out.println(this.targetY - this.y);
+					this.move();
+				}
+			}
+
+
+		} else if (this.targetX != this.x) {
+			//System.out.println("I am not at the target's y");
+			if (this.targetX < x) {
 				this.faceWest();
 				this.x = getAvenue();
 				this.y = getStreet();
@@ -201,43 +232,15 @@ public class Octopus extends Player {
 					System.out.println(this.x - this.targetX);
 					this.move();
 				}
-			} else if (this.targetX > this.x) {
-				//System.out.println("I am to the west of the target's x");
+
+			} else {
 				this.faceEast();
-				this.x = getAvenue();
-				this.y = getStreet();
-				for (int i =0; i < (this.targetX - this.x)+(this.gen.nextInt(5-1)+1); i++) {
+
+				for (int i =0; i < (this.targetX - this.x); i++) {
 					if (this.targetX == this.x) {
 						break;
 					}
-					System.out.println(this.targetX - this.x);
-					this.move();
-				}
-			}
-
-
-		} else if (this.targetY != this.y) {
-			//System.out.println("I am not at the target's y");
-			if (this.targetY < y) {
-				this.faceNorth();
-				this.x = getAvenue();
-				this.y = getStreet();
-				for (int i =0; i < (this.y - this.targetY)+(this.gen.nextInt(5-1)+1); i++) {
-					if (this.targetY == this.y) {
-						break;
-					}
-					System.out.println(this.x - this.targetX);
-					this.move();
-				}
-
-			} else {
-				this.faceSouth();
-
-				for (int i =0; i < (this.targetY - this.y)+(this.gen.nextInt(5-1)+1); i++) {
-					if (this.targetY == this.y) {
-						break;
-					}
-					System.out.println(this.targetY- this.y);
+					System.out.println(this.targetX- this.x);
 					this.move();
 				}
 
@@ -247,7 +250,6 @@ public class Octopus extends Player {
 
 
 	}
-
 
 	private void lockOnTarget() {
 
@@ -393,6 +395,18 @@ public class Octopus extends Player {
 		while (this.isFacingNorth() == false) {
 			this.turnRight();
 		}
+	}
+
+	@Override
+	protected boolean onLeftWall() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	protected boolean onRightWall() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 
