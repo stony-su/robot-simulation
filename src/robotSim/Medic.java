@@ -9,6 +9,8 @@ public class Medic extends Player {
 	private Player octopus;
 	private boolean goingLeft = false;
 	private boolean skipNextTurn = false;
+	private boolean revivedThisTurn = false;
+	private boolean isAlgae = false;
 
 	private final int INJURED_THRESHOLD = 5;
 	private final int MAX_ENERGY = 10;
@@ -44,6 +46,9 @@ public class Medic extends Player {
 
 	@Override
 	public int getType() {
+		if (isAlgae) {
+			return 3;
+		}
 		return 1;
 	}
 
@@ -51,6 +56,12 @@ public class Medic extends Player {
 	public void takeTurn() {
 		super.setX(getAvenue());
 		super.setY(getStreet());
+
+		if (isAlgae) {
+			System.out.println(getName() + " is algae and spins in place.");
+			spinInPlace();
+			return;
+		}
 
 		if (skipNextTurn) {
 			skipNextTurn = false;
@@ -125,7 +136,6 @@ public class Medic extends Player {
 		goTo(bestY, bestX);
 	}
 
-	
 	private void handleNearbyPlayers() {
 		Random rand = new Random();
 		for (int i = 0; i < playerRecord.length; i++) {
@@ -154,9 +164,9 @@ public class Medic extends Player {
 
 	private void optimalMove() {
 		if (goingLeft) {
-			pointWest();
+			pointTo(Direction.WEST);
 		} else {
-			pointEast();
+			pointTo(Direction.EAST);
 		}
 		move(stepsPerMove);
 	}
@@ -169,11 +179,11 @@ public class Medic extends Player {
 	private void goToStreet(int street) {
 		street = Math.max(MIN_STREET, Math.min(MAX_STREET, street));
 		if (getStreet() > street) {
-			pointNorth();
+			pointTo(Direction.NORTH);
 			move(getStreet() - street);
 		} else {
 			if (getStreet() < street) {
-				pointSouth();
+				pointTo(Direction.SOUTH);
 				move(street - getStreet());
 			}
 		}
@@ -182,11 +192,11 @@ public class Medic extends Player {
 	private void goToAvenue(int avenue) {
 		avenue = Math.max(MIN_AVENUE, Math.min(MAX_AVENUE, avenue));
 		if (getAvenue() > avenue) {
-			pointWest();
+			pointTo(Direction.WEST);
 			move(getAvenue() - avenue);
 		} else {
 			if (getAvenue() < avenue) {
-				pointEast();
+				pointTo(Direction.EAST);
 				move(avenue - getAvenue());
 			}
 		}
@@ -252,10 +262,18 @@ public class Medic extends Player {
 		}
 	}
 
+	public void getTagged() {
+		System.out.println(getName() + " was tagged! Turning into algae.");
+		switchModes();
+	}
+
 	public void switchModes() {
-		System.out.println(getName() + " was tagged! Spinning and skipping next turn.");
-		spinInPlace();
-		skipNextTurn = true;
+		if (!isAlgae) {
+			isAlgae = true;
+			super.setColor(Color.GREEN);
+			super.setEnergyLevel(0);
+			super.setLabel("ALGAE");
+		}
 	}
 
 	private void spinInPlace() {
@@ -263,43 +281,46 @@ public class Medic extends Player {
 		turnAround();
 	}
 
-	private void pointNorth() {
-		if (isFacingEast()) {
-			turnLeft();
-		} else if (isFacingSouth()) {
-			turnAround();
-		} else if (isFacingWest()) {
-			turnRight();
-		}
-	}
-
-	private void pointSouth() {
-		if (isFacingEast()) {
-			turnRight();
-		} else if (isFacingNorth()) {
-			turnAround();
-		} else if (isFacingWest()) {
-			turnLeft();
-		}
-	}
-
-	private void pointWest() {
-		if (isFacingSouth()) {
-			turnRight();
-		} else if (isFacingEast()) {
-			turnAround();
-		} else if (isFacingNorth()) {
-			turnLeft();
-		}
-	}
-
-	private void pointEast() {
-		if (isFacingSouth()) {
-			turnLeft();
-		} else if (isFacingWest()) {
-			turnAround();
-		} else if (isFacingNorth()) {
-			turnRight();
+	private void pointTo(Direction direction) {
+		switch (direction) {
+		case NORTH:
+			if (isFacingEast()) {
+				turnLeft();
+			} else if (isFacingSouth()) {
+				turnAround();
+			} else if (isFacingWest()) {
+				turnRight();
+			}
+			break;
+		case SOUTH:
+			if (isFacingEast()) {
+				turnRight();
+			} else if (isFacingNorth()) {
+				turnAround();
+			} else if (isFacingWest()) {
+				turnLeft();
+			}
+			break;
+		case WEST:
+			if (isFacingSouth()) {
+				turnRight();
+			} else if (isFacingEast()) {
+				turnAround();
+			} else if (isFacingNorth()) {
+				turnLeft();
+			}
+			break;
+		case EAST:
+			if (isFacingSouth()) {
+				turnLeft();
+			} else if (isFacingWest()) {
+				turnAround();
+			} else if (isFacingNorth()) {
+				turnRight();
+			}
+			break;
+		default:
+			break;
 		}
 	}
 }

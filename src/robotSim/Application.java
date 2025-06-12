@@ -89,6 +89,7 @@ public class Application {
             	//if everyone is on the wall, call octopus
                 if (everyoneOnWall(playerArr)) {
                     callOctopus();
+                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 }
                 
                 //updates player records for person taking turn
@@ -100,14 +101,17 @@ public class Application {
                 	playerArr[i].takeTurn();
                 
                 //if runner is on wall, skip it's turn
+                	((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 } else if (playerArr[i].getType() == 2 && !onWall(playerArr[i])) {
                     playerArr[i].takeTurn();
                  
                 // if player is octopus, take it's turn
+                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 } else if (playerArr[i].getType() == 4) {
                     playerArr[i].takeTurn();
                     
                     //if octopus has tagged someone this turn, trigger the tag
+                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                     if (((Octopus) playerArr[i]).getTagging()) {
                     	//get name of victim
                         String name = ((Octopus)playerArr[i]).getTargetName();
