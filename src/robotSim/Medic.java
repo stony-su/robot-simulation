@@ -77,7 +77,7 @@ public class Medic extends Player {
 		for (int i = 0; i < playerRecord.length; i++) {
 			Player p = playerRecord[i];
 			if (p instanceof Runner) {
-				if (((Runner) p).isAlgae()) {
+				if (((Runner) p).getType() == 3) {
 					int px = p.getX();
 					int py = p.getY();
 					int dist = Math.abs(mx - px) + Math.abs(my - py);
@@ -136,8 +136,8 @@ public class Medic extends Player {
 			}
 
 			if (getX() == p.getX() && getY() == p.getY()) {
-				if (((Runner) p).isAlgae()) {
-					((Runner) p).switchModes();
+				if (((Runner) p).getType() == 3) {
+					((Runner) p).revive();
 					int newEnergy = rand.nextInt(MAX_REVIVE_ENERGY - MIN_REVIVE_ENERGY + 1) + MIN_REVIVE_ENERGY;
 					p.setEnergyLevel(newEnergy);
 					System.out.println(getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
@@ -220,7 +220,7 @@ public class Medic extends Player {
 		for (int i = 0; i < playerRecord.length; i++) {
 			Player p = playerRecord[i];
 			if (p != this && p.getX() == tx && p.getY() == ty) {
-				if (p instanceof Runner && ((Runner) p).isAlgae()) {
+				if (p instanceof Runner && ((Runner) p).getType() == 3) {
 					danger *= 0.01;
 				} else {
 					if (p.getEnergyLevel() < INJURED_THRESHOLD) {
