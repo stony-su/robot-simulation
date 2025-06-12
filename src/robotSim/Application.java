@@ -1,7 +1,11 @@
 package robotSim;
 import java.util.*;
 import becker.robots.*;
-
+/**
+ * Application class to carry out the game
+ * @author Darren Su
+ * @version June 12th, 
+ */
 public class Application {
     private final static int OCTO_NUM = 1;
     private final static int PLAYER_NUM = 5;
@@ -62,7 +66,6 @@ public class Application {
 
                 if (everyoneOnWall(playerArr)) {
                     callOctopus();
-                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 }
 
                 playerRecord[] recordArr = updateRecords(playerArr);
@@ -70,13 +73,10 @@ public class Application {
 
                 if (playerArr[i].getType() == 1) {
                 	playerArr[i].takeTurn();
-                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 } else if (playerArr[i].getType() != 4 && !onWall(playerArr[i])) {
                     playerArr[i].takeTurn();
-                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                 } else if (playerArr[i].getType() == 4) {
                     playerArr[i].takeTurn();
-                    ((Octopus) playerArr[playerArr.length-1]).updateIsOnWall(everyoneOnWall(playerArr));
                     if (((Octopus) playerArr[i]).getTagging()) {
                         String name = ((Octopus)playerArr[i]).getTargetName();
                         triggerTag(name, playerArr);
@@ -153,7 +153,11 @@ public class Application {
             if (arr[i].getName().equals(name)){
                 double dodge = arr[i].getDodgingAbility();
                 if (Math.random() > dodge) {
-                    ((Runner)arr[i]).getTagged();
+                	if (arr[i].getType() == 2)
+                		((Runner)arr[i]).getTagged();
+                	else if (arr[i].getType() == 1)
+                		((Medic)arr[i]).switchModes();
+
                 }
             }
         }
