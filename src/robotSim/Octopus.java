@@ -17,9 +17,9 @@ public class Octopus extends Player {
 	private int targetX, targetY;
 	private double targetDistance;
 	private String targetName;
-	  private int wall1X, wall2X;
-	  private boolean everyoneOnWall;
-
+	private int wall1X, wall2X;
+	private boolean everyoneOnWall;
+	private int stepsThisTurn= 0;
 
 
 	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
@@ -30,8 +30,8 @@ public class Octopus extends Player {
 		this.maxStepsPerMove = maxStepsPerMove;
 		super.setX(x);
 		super.setY(y);
-		 wall1X = 1;
-	        wall2X = 22;
+		wall1X = 1;
+	    wall2X = 22;
 
 
 
@@ -47,8 +47,9 @@ public class Octopus extends Player {
 			int stepsNum = 1;
 			//System.out.println("About to move " + stepsNum + "steps");
 			for (int i = 0; i < stepsNum; i++) {
-				if (this.frontIsClear() && (this.x) != wall1X && this.x != wall2X && this.everyoneOnWall == false) {
+				if (this.frontIsClear() && (this.x) != wall1X && this.x != wall2X && this.everyoneOnWall == false && this.stepsThisTurn+stepsNum < this.maxStepsPerMove) {
 					super.move();
+					this.stepsThisTurn +=1;
 					this.x = getAvenue();
 					this.y = getStreet();
 					for (int j = 0; j < super.playerList.length; j++) {
@@ -86,11 +87,7 @@ public class Octopus extends Player {
 					}
 					
 				}
-				if (stepsNum == maxStepsPerMove) {
-					this.energyLevel -= 2;
-				} else {
-					this.energyLevel -= 1;
-				}
+				
 				
 				if (this.x == wall1X) {
 					this.faceEast();
@@ -102,10 +99,14 @@ public class Octopus extends Player {
 					super.move();
 				}
 			}
+		} else if (this.stepsThisTurn == this.maxStepsPerMove) {
+			this.turnAround();
+			this.turnAround();
 		} else {
 			if (this.frontIsClear()) {
 				super.move();
 			}
+			
 		}
 
 	}
@@ -113,35 +114,42 @@ public class Octopus extends Player {
 	
 
 	public void takeTurn() {
-		
-		this.x = getAvenue();
-		this.y = getStreet();
-
-		this.tagging = false;
-		//System.out.println("Current X" + this.x + " current Y" +this.y);
-		//System.out.println(this.chasing);
-		if (!this.resting) {
-			this.chase();
-		}
-		for (int i =0; i< super.playerList.length; i++) {
-			if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
-				super.playerList[i].updateCatchIndex(3);
-				this.chasing = false;
-				this.lockOnTarget();
+		if (this.energyLevel > 0) {
+			this.stepsThisTurn = 0;
+			this.x = getAvenue();
+			this.y = getStreet();
+	
+			this.tagging = false;
+			//System.out.println("Current X" + this.x + " current Y" +this.y);
+			//System.out.println(this.chasing);
+			if (!this.resting) {
+				this.chase();
 			}
-		}
-		this.x = getAvenue();
-		this.y = getStreet();
-		
-		for (int i =0; i< super.playerList.length; i++) {
-			if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
-				super.playerList[i].updateCatchIndex(3);
-				this.lockOnTarget();
+			for (int i =0; i< super.playerList.length; i++) {
+				if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
+					super.playerList[i].updateCatchIndex(3);
+					this.chasing = false;
+					this.lockOnTarget();
+				}
 			}
+			this.x = getAvenue();
+			this.y = getStreet();
+			
+			for (int i =0; i< super.playerList.length; i++) {
+				if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
+					super.playerList[i].updateCatchIndex(3);
+					this.lockOnTarget();
+				}
+			}
+			//System.out.println("Chasing");
+			if (this.stepsThisTurn == this.maxStepsPerMove) {
+				this.energyLevel -= 2;
+			} else {
+				this.energyLevel -=1;
+			}
+		} else if (this.energyLevel <= 0) {
+			this.rest();
 		}
-		//System.out.println("Chasing");
-
-
 	}
 
 	private void chase() {
@@ -319,27 +327,16 @@ public class Octopus extends Player {
 		swapArray[pos2] = swapped1;
 	}
 	private void rest() {
-		Random r = new Random();
-		if (this.resting == true) {
-			for (int i =0; i < (r.nextInt(3 - 1 + 1) + 1); i++) {
-				if (this.energyLevel +1 <= this.maximumEnergyLevel) {
-					this.energyLevel += 1;
-				} else {
-					this.resting = false;
-				}
-			}
-		}
+		this.turnLeft();
+		this.turnLeft();
+		this.turnRight();
+		this.turnRight();
+		this.energyLevel = this.maximumEnergyLevel;
+		
 
 	}
 
-	private boolean sufficientEnergy() {
-		if (this.energyLevel > 0) {
-			return true;
-		} else {
-			return false;
-
-		}
-	}
+	
 
 
 	public int getType() {
