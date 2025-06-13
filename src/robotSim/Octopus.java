@@ -213,7 +213,9 @@ public class Octopus extends Player {
 			this.rest();
 		}
 	}
-	
+	/**
+ 	*This method simply locks on to a target or locks on to a new target if your target has been tagged
+  	*/
 	private void chase() {
 		// locking on to a target
 		this.lockOnTarget();
@@ -376,22 +378,28 @@ public class Octopus extends Player {
 	/**
 	 * This is probably the most important part of the program: the targeting AI. 
 	 * It functions using an insertion sort and the catchIndex of the playerRecord to determine which player
-	 * should be targeted first. Players with a lower  
+	 * should be targeted first. Players with a lower catch index are more desirable to catch (i.e: a Medic or closer to the Octopus etc)
+  	 * It also updates the targetX and targetY attributes of the Octopus. Before locking on to a Player, it will update everyone's catch index.
 	 */
 	private void lockOnTarget() {
 		
 		System.out.println("Locking on");
+		/* 
+  		*if no current target
+    		*/
 		if (chasing == false) {
+			// update all player records for catchIndex
 			for (int i = 0; i < super.playerList.length; i++) {
 				super.playerList[i].updateCatchIndex(distanceCalc(super.playerList[i]));
 			}
 			this.sortByCatchability(super.playerList);
 			for (int i = 0; i < super.playerList.length; i++) {
-				System.out.println("Target name: " + super.playerList[i].getName() + " Target catchability: " + super.playerList[i].getCatchIndex());
+				//System.out.println("Target name: " + super.playerList[i].getName() + " Target catchability: " + super.playerList[i].getCatchIndex());
 			}
 			this.chasing = true;
-			// first looking for medic
 			
+				// since everyone has been sorted by catchabiliy, then all you have to do is pick the first one because algae have a catchability of 999.
+				// however just as a precaution we have made it so that it only selects non type 3 (algae)
 				if (super.playerList[0].getType() != 3) {
 					
 					this.targetName = super.playerList[0].getName();
@@ -404,6 +412,7 @@ public class Octopus extends Player {
 			
 		}
 
+		// if you're already chasing someone, then just update their location.
 		if (this.chasing == true) {
 			for (int i = 0; i < super.playerList.length; i++) {
 				if (super.playerList[i].getName().equals(this.targetName)) {
@@ -418,7 +427,9 @@ public class Octopus extends Player {
 	}
 
 
-
+	/**
+ 	* An insertion sort that sorts by catchIndex.
+  	*/
 	private void sortByCatchability(playerRecord [] numbersArray) {
 		final int ARRAYLENGTH = numbersArray.length;
 		for (int i = 0; i < ARRAYLENGTH; i++) {
@@ -430,10 +441,18 @@ public class Octopus extends Player {
 		}
 	}
 
+	/**
+ 	* A method that uses the distance formula from math to calculate the distance to a player.
+ 	* @return - it returns the distance from octopus to a player based on their player record
+  	*/
 	private double distanceCalc(playerRecord player) {
 		return Math.sqrt(Math.pow((player.getX() - this.x),2) + Math.pow((player.getY() - this.y),2));
 	}
 
+	/**
+ 	* A method that uses the distance formula from math to calculate the distance to a player.
+ 	* @return - it returns the distance from octopus to a player based on their player record
+  	*/
 	private double distanceCalc(int currentX, int currentY) {
 		return Math.sqrt(Math.pow((currentX - this.x),2) + Math.pow((currentY - this.y),2));
 	}
@@ -450,8 +469,13 @@ public class Octopus extends Player {
 		this.turnLeft();
 		this.turnRight();
 		this.turnRight();
-		this.energyLevel = this.maximumEnergyLevel;
-		
+
+		// if you went into negative stamina, only recover to half
+		if (this.energyLevel < 0) {
+			this.energyLevel = this.maximumEnergyLevel/2;
+		} else {
+			this.energyLevel = this.maximumEnergyLevel;
+		}
 
 	}
 
