@@ -45,6 +45,7 @@ public class Octopus extends Player {
 		this.maximumEnergyLevel = energyLevel;
 		this.energyLevel = this.maximumEnergyLevel;
 		this.maxStepsPerMove = maxStepsPerMove;
+		super.setLabel(name);
 		super.setX(x);
 		super.setY(y);
 		// wall positions, the octopus cannot go beyond them
@@ -451,11 +452,16 @@ public class Octopus extends Player {
 
 	/**
  	* A method that uses the distance formula from math to calculate the distance to a player.
- 	* @return - it returns the distance from octopus to a player based on their player record
+ 	* @return - it returns the distance from octopus to a player based on the player's current position.
   	*/
 	private double distanceCalc(int currentX, int currentY) {
 		return Math.sqrt(Math.pow((currentX - this.x),2) + Math.pow((currentY - this.y),2));
 	}
+
+	/**
+ 	* Helper method for the insertion sort.
+  	* Swaps 2 player records in the array.
+  	*/
 	private static void swap(int pos1, int pos2, playerRecord swapArray[]) {
 		// saving the 2 numbers to temp variables
 		playerRecord swapped1 = swapArray[pos1];
@@ -463,7 +469,12 @@ public class Octopus extends Player {
 		// swapping the variables
 		swapArray[pos1] = swapArray[pos2];
 		swapArray[pos2] = swapped1;
+
 	}
+
+	/**
+ 	* This method spins the Octopus around and sets energy level back to 100% or 50% based on if the octopus overdrawed stamina.
+  	*/
 	private void rest() {
 		this.turnLeft();
 		this.turnLeft();
@@ -481,11 +492,18 @@ public class Octopus extends Player {
 
 	
 
-
+	/**
+ 	* Accessor method for the type of the octopus
+  	* @return - the type of the Octopus (4)
+  	*/
 	public int getType() {
 		return 4;
 	}
 
+	/**
+ 	* A modifier method that helps set the Octopus to orange at the start.
+  	* but it can be used for any color
+  	*/
 	@Override
 	public void setColor(Color color) {
 		super.setColor(color);
@@ -493,13 +511,18 @@ public class Octopus extends Player {
 
 
 
-
+	/**
+ 	* This method updates the playerList based on the information given by the application class.
+  	*/
 	public void setPlayerRecord(playerRecord [] arr) {
 		super.playerList = arr;
 
 	}
 
-
+	/**
+	 * General helper method, faces to the south. 
+	 * If it is not facing south, then it will turn left until it does.
+	 */
 	private void faceSouth() {
 		while (this.isFacingSouth() == false) {
 			this.turnLeft();
