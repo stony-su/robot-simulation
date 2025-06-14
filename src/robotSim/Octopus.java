@@ -329,7 +329,7 @@ public class Octopus extends Player {
 					if (this.targetY == this.y) {
 						break;
 					}
-					System.out.println(this.targetY - this.y);
+					//System.out.println(this.targetY - this.y);
 					this.move();
 				}
 			}
@@ -351,7 +351,7 @@ public class Octopus extends Player {
 					if (this.targetX == this.x) {
 						break;
 					}
-					System.out.println(this.x - this.targetX);
+					//System.out.println(this.x - this.targetX);
 					this.move();
 				}
 				/*
@@ -364,7 +364,7 @@ public class Octopus extends Player {
 					if (this.targetX == this.x) {
 						break;
 					}
-					System.out.println(this.targetX- this.x);
+					//System.out.println(this.targetX- this.x);
 					this.move();
 				}
 
@@ -405,8 +405,8 @@ public class Octopus extends Player {
 					this.targetName = super.playerList[0].getName();
 					this.targetX = super.playerList[0].getX();
 					this.targetY = super.playerList[0].getY();
-					System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
-					System.out.println(targetName);
+					//System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
+					//System.out.println(targetName);
 
 				}
 			

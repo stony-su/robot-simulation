@@ -81,10 +81,8 @@ public class Application {
         octopus.setPlayerRecord(runnerArr);
         ((Medic)medic).setPlayerRecord(playerArr);
         
-        //if players survive 50 turns, they win
-        int turnCounter = 0;
         //main game loop, stops when all players are caught
-        while (!allPlayersCaught || turnCounter > 50) {
+        while (!allPlayersCaught) {
         	//everyone takes a turn
             for (int i = 0; i < playerArr.length; i++) {
             	
@@ -122,8 +120,6 @@ public class Application {
                 //update player records based on movements this turn
                 updateStatus(playerArr);
                 
-                //update counter
-                turnCounter = turnCounter +1;
             }
         }
     }
