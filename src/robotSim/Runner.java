@@ -111,32 +111,39 @@ public class Runner extends Player {
 		//if is not an algae
 		if (!this.isAlgae) {
 			//recover energy is missing energy
-			if (this.energyHeld < this.energyCap)
-				this.energyHeld = this.energyHeld + this.energyRecovery;
 			
-			//speed up if close to octopus
-			if (octopus != null) {
-				double distanceFromOctopus = this.accessDistance(getAvenue(), getStreet(), this.octopus.getX(), this.octopus.getY());
-				if (distanceFromOctopus <this.minStartle && this.energyHeld > this.energyCap/3)
-					this.stepsPerMove = super.getMaxStepsPerMove();
-				else
-					this.stepsPerMove = this.energyRecovery;
+			//if the energy is too low, rest to recover energy instead of moving
+			if (this.energyHeld < this.energyCap/2) {
+				this.energyHeld = this.energyHeld + this.energyRecovery*2;
 			}
 			else {
-				this.stepsPerMove = this.energyRecovery;
+				
+				if(this.energyHeld < this.energyCap)
+					this.energyHeld = this.energyHeld + this.energyRecovery;
+				
+				//speed up if close to octopus
+				if (octopus != null) {
+					double distanceFromOctopus = this.accessDistance(getAvenue(), getStreet(), this.octopus.getX(), this.octopus.getY());
+					if (distanceFromOctopus <this.minStartle && this.energyHeld > this.energyCap/4)
+						this.stepsPerMove = super.getMaxStepsPerMove();
+					else
+						this.stepsPerMove = this.energyRecovery;
+				}
+				else {
+					this.stepsPerMove = this.energyRecovery;
+				}
+				
+				//get other runner's record
+				this.runnerRecord = super.getPlayerRecord();
+				
+				//move through the optimal path
+				this.optimalMove();
+				
+				//lose energy based on steps moved this turn
+				this.energyHeld = this.energyHeld - this.stepsPerMove;
 			}
-			
-			//get other runner's record
-			this.runnerRecord = super.getPlayerRecord();
-			
-			//move through the optimal path
-			this.optimalMove();
-			
-			//lose energy based on steps moved this turn
-			this.energyHeld = this.energyHeld - this.stepsPerMove;
-			
 			//if energy is low, reduce dodging ability 
-			if (energyHeld < energyCap/2) {
+			if (energyHeld < energyCap/1.5) {
 				super.setDodgingAbility(nerfedDodgeAbility);
 			}
 			else {
