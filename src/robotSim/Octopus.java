@@ -1,45 +1,71 @@
+
 package robotSim;
 
 import java.awt.*;
 import becker.robots.City;
 import becker.robots.Direction;
 import java.util.*;
-import java.util.*;
+
+
+/**
+ * The octopus is the main antagonist of the game of octopus. 
+ * @author Maymun Rahman
+ *
+ */
 public class Octopus extends Player {
+	// declaration of variables
 	Random gen = new Random();
 	private int x, y;
 	private int maximumEnergyLevel, maxStepsPerMove, energyLevel;
-	private double dodgingAbility;
 	private String name;
 	private boolean resting = false;
 	private boolean chasing = false;
 	private boolean tagging = false;
 	private int targetX, targetY;
-	private double targetDistance;
 	private String targetName;
-	  private int wall1X, wall2X;
-	  private boolean everyoneOnWall;
+	private static int WALL1X = 1, WALL2X = 22;
+	private boolean everyoneOnWall;
+	private int stepsThisTurn= 0;
 
-
-
+	/**
+	 * Constructor for the octopus
+	 * @param name - name of the octopus
+	 * @param energyLevel - starting energy level
+	 * @param maxStepsPerMove - maximum steps per turn
+	 * @param city - the City in which the game is being played
+	 * @param y - starting y position
+	 * @param x - starting x position
+	 * @param direction - direction that it starts in
+	 */
 	public Octopus(String name, int energyLevel, int maxStepsPerMove, double dodgingAbility, City city, int y, int x, Direction direction) {
 		super(name,energyLevel, maxStepsPerMove, dodgingAbility, city, y, x, direction);
+		// setting color to orange
 		this.setColor(new Color(255, 165, 0));
+		// setting energy level
 		this.maximumEnergyLevel = energyLevel;
 		this.energyLevel = this.maximumEnergyLevel;
 		this.maxStepsPerMove = maxStepsPerMove;
+		super.setLabel(name);
 		super.setX(x);
 		super.setY(y);
-		 wall1X = 1;
-	        wall2X = 22;
-
+		// wall positions, the octopus cannot go beyond them
+		
+	   
 
 
 	}
 	
+	/**
+	 * This method gets from the application class if every runner is on the wall
+	 * @param isOnWall
+	 */
 	public void updateIsOnWall(boolean isOnWall) {
 		this.everyoneOnWall = isOnWall;
 	}
+	/**
+	 * Overridden move method. It handles the energy consumption and makes sure that the front is clear before moving
+	 * It also makes sure that it's not going past the player safe zone 
+	 */
 	public void move() {
 
 		if (this.chasing) {
@@ -47,10 +73,15 @@ public class Octopus extends Player {
 			int stepsNum = 1;
 			//System.out.println("About to move " + stepsNum + "steps");
 			for (int i = 0; i < stepsNum; i++) {
-				if (this.frontIsClear() && (this.x) != wall1X && this.x != wall2X && this.everyoneOnWall == false) {
+				// if clear and not moving into safe zone
+				if (this.frontIsClear() && (this.x) != WALL1X && this.x != WALL2X && this.everyoneOnWall == false && this.stepsThisTurn+stepsNum < this.maxStepsPerMove) {
 					super.move();
+					this.stepsThisTurn +=1;
 					this.x = getAvenue();
 					this.y = getStreet();
+					/*
+					 * if you are on another player who isn't your current target
+					 */
 					for (int j = 0; j < super.playerList.length; j++) {
 						if (super.playerList[i].getX()== this.x && this.y == super.playerList[i].getY() && super.playerList[i].getType() != 3) {
 							this.targetName = super.playerList[i].getName();
@@ -59,24 +90,32 @@ public class Octopus extends Player {
 							this.lockOnTarget();
 							break;
 						}
-						System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
+						//System.out.println("Distance to target: " + this.distanceCalc(this.targetX, this.targetY));
 					}
-
+					
+					/*
+					 * if you are on your current target, then tag
+					 */
 					if (this.targetX == this.x && this.targetY == this.y) {
 						this.tagAttempt();
 						for (int j = 0; j < super.playerList.length; j++) {
 							if (super.playerList[j].getName().equals(this.targetName)) {
+								/*
+								 * Checking if your target got algaed or not, and updating their dodge skill
+								 */
 								if (super.playerList[j].getType() == 3) {
 									super.playerList[j].updateDodge(super.playerList[j].getDodge() -1);
 								} else {
 									super.playerList[j].updateDodge(super.playerList[j].getDodge() +1);
 								}
+								// making their catchIndex very high because it's an algae
 								super.playerList[i].updateCatchIndex(3);
 								break;
 							}
+							// lock on to a new target
 							this.lockOnTarget();
-							System.out.println("Am tagging: " + this.tagging);
-							System.out.println("resting");
+							//System.out.println("Am tagging: " + this.tagging);
+
 							this.chasing = false;
 							
 
@@ -86,71 +125,109 @@ public class Octopus extends Player {
 					}
 					
 				}
-				if (stepsNum == maxStepsPerMove) {
-					this.energyLevel -= 2;
-				} else {
-					this.energyLevel -= 1;
-				}
 				
-				if (this.x == wall1X) {
+				
+				/*
+				 * If you try entering the safe zone, turn around
+				 */
+				if (this.x == WALL1X) {
 					this.faceEast();
 					super.move();
 				}
 				
-				if (this.x == wall2X) {
+				if (this.x == WALL2X) {
 					this.faceWest();
 					super.move();
 				}
 			}
+			/*
+			 * If out of energy, spin
+			 */
+		} else if (this.stepsThisTurn == this.maxStepsPerMove) {
+			this.turnAround();
+			this.turnAround();
 		} else {
 			if (this.frontIsClear()) {
 				super.move();
 			}
+			
 		}
 
 	}
 
 	
-
+	/**
+	 * This is the method running in the application class that does most of the work.
+	 * It handles resting based on energy level, locking on to a target and tagging
+	 */
 	public void takeTurn() {
-		
-		this.x = getAvenue();
-		this.y = getStreet();
-
-		this.tagging = false;
-		//System.out.println("Current X" + this.x + " current Y" +this.y);
-		//System.out.println(this.chasing);
-		if (!this.resting) {
-			this.chase();
-		}
-		for (int i =0; i< super.playerList.length; i++) {
-			if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
-				super.playerList[i].updateCatchIndex(3);
-				this.chasing = false;
-				this.lockOnTarget();
+		if (this.energyLevel > 0) {
+			this.stepsThisTurn = 0;
+			this.x = getAvenue();
+			this.y = getStreet();
+	
+			this.tagging = false;
+			//System.out.println("Current X" + this.x + " current Y" +this.y);
+			//System.out.println(this.chasing);
+			if (!this.resting) {
+				this.chase();
 			}
-		}
-		this.x = getAvenue();
-		this.y = getStreet();
-		
-		for (int i =0; i< super.playerList.length; i++) {
-			if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
-				super.playerList[i].updateCatchIndex(3);
-				this.lockOnTarget();
+			
+			/*
+			 * Checking that you are on someone who's your target.
+			 */
+			for (int i =0; i< super.playerList.length; i++) {
+				if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
+					super.playerList[i].updateCatchIndex(3);
+					this.chasing = false;
+					this.lockOnTarget();
+				}
 			}
+			this.x = getAvenue();
+			this.y = getStreet();
+			/*
+			 * Checking that you are on someone who's your target.
+			 */
+			for (int i =0; i< super.playerList.length; i++) {
+				if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
+					super.playerList[i].updateCatchIndex(3);
+					this.chasing = false;
+					this.lockOnTarget();
+				}
+			}
+			//System.out.println("Chasing");
+			
+			/*
+			 * If you've moved at your maximum steps per move, then deduct 2 energy
+			 * If you've moved below maximum steps, deduct 1 energy
+			 */
+			if (this.stepsThisTurn == this.maxStepsPerMove) {
+				this.energyLevel -= 2;
+			} else {
+				this.energyLevel -=1;
+			}
+		/*
+		 * If your energy level is below or equal to 0 (this can happen because if your energy is 1 and you move at maximum steps then you
+		 * "go into negative" this is an intended feature (also realistic because sometimes you can overexert yourself)	
+		 */
+		} else if (this.energyLevel <= 0) {
+			this.rest();
 		}
-		//System.out.println("Chasing");
-
-
 	}
-
+	/**
+ 	*This method simply locks on to a target or locks on to a new target if your target has been tagged
+  	*/
 	private void chase() {
+		// locking on to a target
 		this.lockOnTarget();
 
-		System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
+		//System.out.format("My target is at X %d, Y %d and named %s\n", this.targetX, this.targetY, this.targetName);
 		for (int i = 0; i < super.playerList.length; i++) {
+			/*
+			 * If your target has been algaefied, update their catch index to be very high
+			 */
 			if (super.playerList[i].getName().equals(this.targetName)) {
-				System.out.println("Target type" + super.playerList[i].getType());
+				//System.out.println("Target type" + super.playerList[i].getType());
 				if (this.targetName.equals(super.playerList[i].getName()) && super.playerList[i].getType() == 3) {
 					super.playerList[i].updateCatchIndex(3);
 					this.chasing = false;
@@ -160,40 +237,76 @@ public class Octopus extends Player {
 
 
 		}
-		System.out.format("My is at X %d, Y %d \n", this.x, this.y);
+		//System.out.format("My is at X %d, Y %d \n", this.x, this.y);
 		//System.out.println("Current energy: " + this.getEnergyLevel());
+		
+		// get to your target
 		this.advanceToTarget();
-		//this.tagAttempt();
 	}
-
+	/**
+	 * Accessor method for your target's name
+	 * @return - your current target's name
+	 */
 	public String getTargetName() {
 		return this.targetName;
 	}
-
+	
+	/**
+	 * returns if you're chasing someone
+	 * @return - currently chasing or not
+	 */
 	public boolean getChasing() {
 		return this.chasing; 
 	}
+	
+	/**
+	 * Accessor method for your target's x
+	 * @return - target's current x
+	 */
 	public int getTargetX() {
 		return this.targetX; 
 	}
+	
+	/**
+	 * Accessor method for your target's y
+	 * @return - target's current y
+	 */
 	public int getTargetY() {
 		return this.targetY; 
 	}
+	
+	/**
+	 * Modifier method to set tagging to true
+	 */
 	private void tagAttempt() {
 		this.tagging = true;
 	}
 
 
-
+	/**
+	 * Checks if your tagging or not
+	 * @return
+	 */
 	public boolean getTagging() {
 		return this.tagging;
 	}
-
+	
+	/**
+	 * This method gets the octopus to the target's x and y
+	 */
 	private void advanceToTarget() {
+		/*
+		 * If your target is above/below you then move to your target's y location first
+		 * I programmed it like this because I noticed that runner's usually run in a straight line instead of ducking up and down.
+		 */
 		if (this.targetY != this.y) {
 			//System.out.println("I am not at the target's x");
+			
+			/*
+			 * If below your target
+			 */
 			if (this.targetY < this.y) {
-				//System.out.println("I am to the east of the target's x");
+				//System.out.println("I am to the south of the target's y");
 				this.faceNorth();
 				this.x = getAvenue();
 				this.y = getStreet();
@@ -204,8 +317,12 @@ public class Octopus extends Player {
 					System.out.println(this.y - this.targetY);
 					this.move();
 				}
+				
+				/*
+				 * If above your target 
+				 */
 			} else if (this.targetY > this.y) {
-				//System.out.println("I am to the west of the target's x");
+				//System.out.println("I am to the north of the target's y");
 				this.faceSouth();
 				this.x = getAvenue();
 				this.y = getStreet();
@@ -217,10 +334,16 @@ public class Octopus extends Player {
 					this.move();
 				}
 			}
-
-
+			
+			/*
+			 * If not at target x
+			 */
 		} else if (this.targetX != this.x) {
-			//System.out.println("I am not at the target's y");
+			//System.out.println("I am not at the target's x");
+			
+			/*
+			 * If to the east of target
+			 */
 			if (this.targetX < x) {
 				this.faceWest();
 				this.x = getAvenue();
@@ -232,7 +355,9 @@ public class Octopus extends Player {
 					System.out.println(this.x - this.targetX);
 					this.move();
 				}
-
+				/*
+				 * If to the west of target
+				 */
 			} else {
 				this.faceEast();
 
@@ -250,21 +375,32 @@ public class Octopus extends Player {
 
 
 	}
-
+	
+	/**
+	 * This is probably the most important part of the program: the targeting AI. 
+	 * It functions using an insertion sort and the catchIndex of the playerRecord to determine which player
+	 * should be targeted first. Players with a lower catch index are more desirable to catch (i.e: a Medic or closer to the Octopus etc)
+  	 * It also updates the targetX and targetY attributes of the Octopus. Before locking on to a Player, it will update everyone's catch index.
+	 */
 	private void lockOnTarget() {
-
+		
 		System.out.println("Locking on");
+		/* 
+  		*if no current target
+    		*/
 		if (chasing == false) {
+			// update all player records for catchIndex
 			for (int i = 0; i < super.playerList.length; i++) {
 				super.playerList[i].updateCatchIndex(distanceCalc(super.playerList[i]));
 			}
 			this.sortByCatchability(super.playerList);
 			for (int i = 0; i < super.playerList.length; i++) {
-				System.out.println("Target name: " + super.playerList[i].getName() + " Target catchability: " + super.playerList[i].getCatchIndex());
+				//System.out.println("Target name: " + super.playerList[i].getName() + " Target catchability: " + super.playerList[i].getCatchIndex());
 			}
 			this.chasing = true;
-			// first looking for medic
 			
+				// since everyone has been sorted by catchabiliy, then all you have to do is pick the first one because algae have a catchability of 999.
+				// however just as a precaution we have made it so that it only selects non type 3 (algae)
 				if (super.playerList[0].getType() != 3) {
 					
 					this.targetName = super.playerList[0].getName();
@@ -277,6 +413,7 @@ public class Octopus extends Player {
 			
 		}
 
+		// if you're already chasing someone, then just update their location.
 		if (this.chasing == true) {
 			for (int i = 0; i < super.playerList.length; i++) {
 				if (super.playerList[i].getName().equals(this.targetName)) {
@@ -291,7 +428,9 @@ public class Octopus extends Player {
 	}
 
 
-
+	/**
+ 	* An insertion sort that sorts by catchIndex.
+  	*/
 	private void sortByCatchability(playerRecord [] numbersArray) {
 		final int ARRAYLENGTH = numbersArray.length;
 		for (int i = 0; i < ARRAYLENGTH; i++) {
@@ -303,13 +442,26 @@ public class Octopus extends Player {
 		}
 	}
 
+	/**
+ 	* A method that uses the distance formula from math to calculate the distance to a player.
+ 	* @return - it returns the distance from octopus to a player based on their player record
+  	*/
 	private double distanceCalc(playerRecord player) {
 		return Math.sqrt(Math.pow((player.getX() - this.x),2) + Math.pow((player.getY() - this.y),2));
 	}
 
+	/**
+ 	* A method that uses the distance formula from math to calculate the distance to a player.
+ 	* @return - it returns the distance from octopus to a player based on the player's current position.
+  	*/
 	private double distanceCalc(int currentX, int currentY) {
 		return Math.sqrt(Math.pow((currentX - this.x),2) + Math.pow((currentY - this.y),2));
 	}
+
+	/**
+ 	* Helper method for the insertion sort.
+  	* Swaps 2 player records in the array.
+  	*/
 	private static void swap(int pos1, int pos2, playerRecord swapArray[]) {
 		// saving the 2 numbers to temp variables
 		playerRecord swapped1 = swapArray[pos1];
@@ -317,35 +469,41 @@ public class Octopus extends Player {
 		// swapping the variables
 		swapArray[pos1] = swapArray[pos2];
 		swapArray[pos2] = swapped1;
+
 	}
+
+	/**
+ 	* This method spins the Octopus around and sets energy level back to 100% or 50% based on if the octopus overdrawed stamina.
+  	*/
 	private void rest() {
-		Random r = new Random();
-		if (this.resting == true) {
-			for (int i =0; i < (r.nextInt(3 - 1 + 1) + 1); i++) {
-				if (this.energyLevel +1 <= this.maximumEnergyLevel) {
-					this.energyLevel += 1;
-				} else {
-					this.resting = false;
-				}
-			}
-		}
+		this.turnLeft();
+		this.turnLeft();
+		this.turnRight();
+		this.turnRight();
 
-	}
-
-	private boolean sufficientEnergy() {
-		if (this.energyLevel > 0) {
-			return true;
+		// if you went into negative stamina, only recover to half
+		if (this.energyLevel < 0) {
+			this.energyLevel = this.maximumEnergyLevel/2;
 		} else {
-			return false;
-
+			this.energyLevel = this.maximumEnergyLevel;
 		}
+
 	}
 
+	
 
+	/**
+ 	* Accessor method for the type of the octopus
+  	* @return - the type of the Octopus (4)
+  	*/
 	public int getType() {
 		return 4;
 	}
 
+	/**
+ 	* A modifier method that helps set the Octopus to orange at the start.
+  	* but it can be used for any color
+  	*/
 	@Override
 	public void setColor(Color color) {
 		super.setColor(color);
@@ -353,13 +511,18 @@ public class Octopus extends Player {
 
 
 
-
+	/**
+ 	* This method updates the playerList based on the information given by the application class.
+  	*/
 	public void setPlayerRecord(playerRecord [] arr) {
 		super.playerList = arr;
 
 	}
 
-
+	/**
+	 * General helper method, faces to the south. 
+	 * If it is not facing south, then it will turn left until it does.
+	 */
 	private void faceSouth() {
 		while (this.isFacingSouth() == false) {
 			this.turnLeft();
@@ -397,17 +560,7 @@ public class Octopus extends Player {
 		}
 	}
 
-	@Override
-	protected boolean onLeftWall() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	protected boolean onRightWall() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
 
 
 
