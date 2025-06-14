@@ -42,6 +42,10 @@ public class Runner extends Player {
 	private int energyHeld;
 	private int energyRecovery;
 	private int minStartle;
+	
+	//ability to dodge octopus
+	private double dodgeAbility;
+	private double nerfedDodgeAbility;
 
 	/**
 	 * Runner constructor that creates robot
@@ -69,6 +73,8 @@ public class Runner extends Player {
 		this.energyRecovery = stepsPerMove;
 		this.energyCap = energyLevel;
 		this.energyHeld = energyLevel;
+		this.dodgeAbility = dodgingAbility;
+		this.nerfedDodgeAbility = dodgeAbility/2;
 		
 		//set player name onto screen
 		super.setLabel(super.getName());
@@ -128,6 +134,14 @@ public class Runner extends Player {
 			
 			//lose energy based on steps moved this turn
 			this.energyHeld = this.energyHeld - this.stepsPerMove;
+			
+			//if energy is low, reduce dodging ability 
+			if (energyHeld < energyCap/2) {
+				super.setDodgingAbility(nerfedDodgeAbility);
+			}
+			else {
+				super.setDodgingAbility(dodgeAbility);
+			}
 		}
 		//if algae, spin around
 		else {
