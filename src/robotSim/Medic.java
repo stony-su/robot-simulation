@@ -46,6 +46,7 @@ public class Medic extends Player {
 	private final double OUT_OF_BOUNDS_DANGER = 1000000.0;
 
 	private final int stepsPerMove; // Maximum steps Medic can take per move
+	private Player octopus;
 
 	/**
 	 * Constructor initializes Medic robot
@@ -59,12 +60,13 @@ public class Medic extends Player {
 	 * @param direction       Initial facing direction
 	 * @param octopus         Reference to the Octopus player
 	 */
-	public Medic(String name, int energyLevel, int maxStepsPerMove, City city, int y, int x, Direction direction) {
+	public Medic(String name, int energyLevel, int maxStepsPerMove, City city, int y, int x, Direction direction, Player octopus) {
 		super(name, energyLevel, maxStepsPerMove, 0, city, y, x, direction);
 		this.stepsPerMove = maxStepsPerMove;
 		this.startedLeft = (x == LEFT_WALL);
 		super.setLabel(super.getName());
 		super.setColor(Color.BLUE);
+		this.octopus = octopus;
 	}
 
 	/**
@@ -77,7 +79,7 @@ public class Medic extends Player {
 		super.setY(this.getStreet());
 
 		if (this.isAlgae) {
-			System.out.println(this.getName() + " is algae and spins in place.");
+			//System.out.println(this.getName() + " is algae and spins in place.");
 			this.spinInPlace();
 			return;
 		}
@@ -86,7 +88,7 @@ public class Medic extends Player {
 
 		if (this.skipNextTurn) {
 			this.skipNextTurn = false;
-			System.out.println(this.getName() + " is recovering and skips this turn.");
+			//System.out.println(this.getName() + " is recovering and skips this turn.");
 			return;
 		}
 
@@ -104,11 +106,11 @@ public class Medic extends Player {
 
 		// Revive nearest algae
 		if (nearestAlgae != null) {
-			System.out.println(
-					this.getName() + " sees algae at (" + nearestAlgae.getY() + ", " + nearestAlgae.getX() + ")");
+			//System.out.println(
+					//this.getName() + " sees algae at (" + nearestAlgae.getY() + ", " + nearestAlgae.getX() + ")");
 			this.moveTowardAlgae(nearestAlgae);
 		} else {
-			System.out.println(this.getName() + " sees no algae. Performing optimal move.");
+			//System.out.println(this.getName() + " sees no algae. Performing optimal move.");
 			this.optimalMove();
 		}
 	}
@@ -241,9 +243,9 @@ public class Medic extends Player {
 			// Generate random energy level within allowed range
 			int newEnergy = rand.nextInt(this.MAX_REVIVE_ENERGY - this.MIN_REVIVE_ENERGY + 1) + this.MIN_REVIVE_ENERGY;
 			p.setEnergyLevel(newEnergy);
-			System.out.println(this.getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
+			//System.out.println(this.getName() + " revived " + p.getName() + " with " + newEnergy + " energy!");
 		} else {
-			System.out.println(this.getName() + " sees " + p.getName() + " but cannot revive yet.");
+			//System.out.println(this.getName() + " sees " + p.getName() + " but cannot revive yet.");
 		}
 	}
 
@@ -256,7 +258,7 @@ public class Medic extends Player {
 		int heal = rand.nextInt(this.MAX_HEAL_AMOUNT - this.MIN_HEAL_AMOUNT + 1) + this.MIN_HEAL_AMOUNT;
 		int boosted = Math.min(this.MAX_ENERGY, p.getEnergyLevel() + heal);
 		p.setEnergyLevel(boosted);
-		System.out.println(this.getName() + " healed " + p.getName() + " to " + boosted + " energy.");
+		//System.out.println(this.getName() + " healed " + p.getName() + " to " + boosted + " energy.");
 	}
 
 	/**
@@ -325,7 +327,7 @@ public class Medic extends Player {
 	public void move(int steps) {
 		for (int i = 0; i < steps; i++) {
 			if (this.getEnergyLevel() <= 0) {
-				System.out.println(this.getName() + " is exhausted. Recovering...");
+				//System.out.println(this.getName() + " is exhausted. Recovering...");
 				this.spinInPlace();
 				this.setEnergyLevel(5);
 				this.skipNextTurn = true;
@@ -338,7 +340,7 @@ public class Medic extends Player {
 
 			super.move(1);
 			this.setEnergyLevel(this.getEnergyLevel() - 1);
-			System.out.println(this.getName() + " moved 1 tile and now has " + this.getEnergyLevel() + " energy.");
+			//System.out.println(this.getName() + " moved 1 tile and now has " + this.getEnergyLevel() + " energy.");
 		}
 	}
 
@@ -420,7 +422,7 @@ public class Medic extends Player {
 	 * Called when the Medic is tagged by Octopus
 	 */
 	public void getTagged() {
-		System.out.println(this.getName() + " was tagged! Turning into algae.");
+		//System.out.println(this.getName() + " was tagged! Turning into algae.");
 		if (!this.isAlgae) {
 			this.isAlgae = true;
 			super.setColor(Color.GREEN);

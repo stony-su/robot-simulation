@@ -1,4 +1,3 @@
-
 package robotSim;
 
 import java.awt.*;
@@ -314,7 +313,7 @@ public class Octopus extends Player {
 					if (this.targetY == this.y) {
 						break;
 					}
-					System.out.println(this.y - this.targetY);
+					//System.out.println(this.y - this.targetY);
 					this.move();
 				}
 				
@@ -384,7 +383,7 @@ public class Octopus extends Player {
 	 */
 	private void lockOnTarget() {
 		
-		System.out.println("Locking on");
+		//System.out.println("Locking on");
 		/* 
   		*if no current target
     		*/

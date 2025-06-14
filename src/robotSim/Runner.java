@@ -186,7 +186,7 @@ public class Runner extends Player {
 		tiles = this.insertionSort(tiles);
 		
 		//debug method
-		printTiles(tiles);
+		//printTiles(tiles);
 		
 		//path is set to least dangerous path
 		int [][] path = tiles[0].getPath();
@@ -348,6 +348,18 @@ public class Runner extends Player {
 	 * @return tile with danger level and optimal path
 	 */
 	private Location predictTileDanger(int xTarget, int yTarget, int step, Location tile) {
+		//if an algae is present on the first target tile, set danger to big number and return
+		if (step == 0) {
+			for(int i = 0; i < this.runnerRecord.length; i++) {
+				//if runner is an algae, avoid it more
+				if (this.runnerRecord[i].getType() == 3) {
+					if (runnerRecord[i].getX() == xTarget && runnerRecord[i].getY() == yTarget) {
+						tile.setDanger(100000);
+						return tile;
+					}
+				}
+			}
+		}
 		//init xy coord
 		int x = super.getAvenue();
 		int y = super.getStreet();

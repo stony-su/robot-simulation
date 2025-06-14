@@ -63,7 +63,7 @@ public class Application {
         }
 
         // Add Medic
-        Player medic = new Medic("Medic", 10, 1, 0.0, city, 1, 1, Direction.SOUTH, 2, octopus);
+        Player medic = new Medic("Medic", 10, 1, city, 1, 1, Direction.SOUTH, octopus);
         playerArr[playerArr.length-2] = medic;
 
         // Create records of all runners and medics
@@ -81,8 +81,10 @@ public class Application {
         octopus.setPlayerRecord(runnerArr);
         ((Medic)medic).setPlayerRecord(playerArr);
         
+        //if players survive 50 turns, they win
+        int turnCounter = 0;
         //main game loop, stops when all players are caught
-        while (!allPlayersCaught) {
+        while (!allPlayersCaught || turnCounter > 50) {
         	//everyone takes a turn
             for (int i = 0; i < playerArr.length; i++) {
             	
@@ -119,6 +121,9 @@ public class Application {
 
                 //update player records based on movements this turn
                 updateStatus(playerArr);
+                
+                //update counter
+                turnCounter = turnCounter +1;
             }
         }
     }
@@ -239,7 +244,7 @@ public class Application {
                 	if (arr[i].getType() == 2)
                 		((Runner)arr[i]).getTagged();
                 	else if (arr[i].getType() == 1)
-                		((Medic)arr[i]).switchModes();
+                		((Medic)arr[i]).getTagged();
 
                 }
             }
