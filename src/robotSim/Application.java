@@ -85,7 +85,7 @@ public class Application {
         while (!allPlayersCaught) {
         	//everyone takes a turn
             for (int i = 0; i < playerArr.length; i++) {
-
+            	
             	//if everyone is on the wall, call octopus
                 if (everyoneOnWall(playerArr)) {
                     callOctopus();
@@ -151,12 +151,15 @@ public class Application {
      * @return boolean value if all the players are on the wall
      */
     private static boolean everyoneOnWall(Player[] playerArr) {
+    	//loops through each player, and checks if it're on the wall and is a algae
         for (int i = 0; i < playerArr.length-2; i++) {
             if (!(onWall(playerArr[i]) || playerArr[i].getType() == 3)) {
+            	//if not an algae and off the wall, return false and break loop
                 return false;
             }
         }
-
+        
+        //tell each player to chance direction to get started on the next round
         for (int a = 0; a < playerArr.length-2; a++) {
             ((Runner)playerArr[a]).changeDirection();
         }
@@ -170,18 +173,23 @@ public class Application {
      */
     private static void createWalls(City city) {
         Wall [] walls = new Wall[2*(WALLS_WIDTH+WALLS_LENGTH)];
+        
+        //loop to create west walls
         for (int i = 0; i < WALLS_WIDTH; i++) {
             walls[i] = new Wall (city, i, 0, Direction.WEST);
         }
-
+        
+        //loop for east walls
         for (int a = 0; a < WALLS_WIDTH; a++) {
             walls[a+WALLS_WIDTH] = new Wall (city, a, WALLS_LENGTH-1, Direction.EAST);
         }
-
+        
+        //loop for north walls
         for (int b = 0; b < WALLS_LENGTH; b++) {
             walls[b+WALLS_WIDTH*2] = new Wall (city, 0, b, Direction.NORTH);
         }
-
+        
+        //loop for south walls
         for (int c = 0; c < WALLS_LENGTH; c++) {
             walls[c+WALLS_WIDTH*2+WALLS_LENGTH] = new Wall (city, WALLS_WIDTH-1, c, Direction.SOUTH);
         }
@@ -193,6 +201,7 @@ public class Application {
      */
     private static playerRecord[] updateRecords(Player[] playerArr) {
         playerRecord[] runnerArr = new playerRecord[PLAYER_NUM + 1];
+        //loops through each runner object to set their XY values to the record
         for (int i = 0; i < runnerArr.length; i++) {
             runnerArr[i] = new playerRecord(playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
         }
@@ -205,6 +214,7 @@ public class Application {
      * @post stops the game if all player are caught
      */
     private static void updateStatus(Player[] arr) {
+    	//if all players are algae, make the main game loop stop
         for (int i = 0; i<arr.length-2; i++) {
             if (arr[i].getType() != 3)
                 return;
@@ -219,8 +229,11 @@ public class Application {
      * @post player might become algae
      */
     private static void triggerTag(String name, Player[] arr) {
+    	//loops through the array of players to find the one with target name
         for (int i = 0; i < arr.length; i++) {
             if (arr[i].getName().equals(name)){
+            	
+            	//uses a random value to see if player is "caught" or not based on their dodge ability
                 double dodge = arr[i].getDodgingAbility();
                 if (Math.random() > dodge) {
                 	if (arr[i].getType() == 2)

@@ -128,7 +128,7 @@ public class darrensTest3 {
     }
 
     private static playerRecord[] updateRecords(Player[] playerArr) {
-        playerRecord[] runnerArr = new playerRecord[PLAYER_NUM];
+        playerRecord[] runnerArr = new playerRecord[playerArr.length];
         for (int i = 0; i < runnerArr.length; i++) {
             runnerArr[i] = new playerRecord(playerArr[i].getAvenue(), playerArr[i].getStreet(), playerArr[i].getName(), playerArr[i].getType(), 0);
         }
