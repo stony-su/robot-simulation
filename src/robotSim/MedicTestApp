@@ -1,0 +1,62 @@
+package robotSim;
+
+import becker.robots.*;
+/**
+ * Application class to test medic revive function
+ * @author Arnnav Kudale
+ * @version June 12th, 2025
+ */
+public class MedicTestApp {
+    public static void main(String[] args) {
+        City city = new City(12, 24);
+
+        // Create Octopus
+        Octopus octopus = new Octopus("Octopus", 10, 3, 0.0, city, 6, 12, Direction.WEST);
+
+        // Create a downed Runner
+        Runner runner = new Runner("Runner", 10, 3, 0.0, city, 5, 5, Direction.NORTH, 2, octopus);
+        runner.setEnergyLevel(0);
+        runner.getTagged();
+
+        // Create medic
+        Medic medic = new Medic("Medic", 10, 3, city, 4, 5, Direction.SOUTH, octopus);
+
+        // Put all players in array
+        Player[] players = new Player[3];
+        players[0] = medic;
+        players[1] = runner;
+        players[2] = octopus;
+
+        // Create player records
+        playerRecord[] records = new playerRecord[3];
+        int i = 0;
+        while (i < players.length) {
+            records[i] = new playerRecord(players[i].getAvenue(), players[i].getStreet(), players[i].getName(), players[i].getType(), 0);
+            i += 1;
+        }
+
+        // Assign records to each player
+        i = 0;
+        ((Medic) players[0]).setPlayerRecord(players);
+        while (i < players.length) {
+            players[i].setPlayerRecord(records);
+            System.out.println("set" + i);
+            i += 1;
+        }
+
+        // Run 5 turns
+        int turn = 1;
+        while (turn <= 5) {
+            System.out.println("\n--- TURN " + turn + " ---");
+
+            // Runner moves
+            runner.takeTurn();
+
+            // Medic moves
+            medic.takeTurn();
+
+            turn += 1;
+        }
+
+    }
+}
