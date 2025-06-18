@@ -21,7 +21,7 @@ public class Medic extends Player {
 	private boolean skipNextTurn = false; // Flag for turn-skipping
 	private boolean isAlgae = false; // Indicates if the Medic has been tagged
 	private boolean startedLeft = false; // Indicates which wall Medic started at
-	private boolean touchedOppositeWall = false; // Revive enabled only after wall is touched
+	private boolean touchedOppositeWall = true; // Revive enabled only after wall is touched
 
 	// Constants for healing and revival behavior
 	private final int INJURED_THRESHOLD = 5;
